@@ -1,7 +1,7 @@
 # HistoGAN
 Experiments for different GAN problems related to histopathology image analysis
 
-`requirements.txt` can be used to create an environment with the necessary packages via `pip install -r requirements` after creating and actviating a blank python virtualenv. OpenSlide needs to be installed separately and can be done so with the conda command `conda install -c conda-forge openslide`.
+`requirements.txt` can be used to create an environment with the necessary packages via `pip install -r requirements.txt` after creating and actviating a blank python virtualenv. OpenSlide needs to be installed separately and can be done so with the conda command `conda install -c conda-forge openslide`.
 
 ## Different experiment directories and contents
 ### Wasserstein_BiGAN

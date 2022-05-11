@@ -10,8 +10,6 @@ Experiments for different GAN problems related to histopathology image analysis
 ├── models.py
 ├── patch_dataset.py
 ├── preprocess.py
-├── scratch_results
-│   └── models
 ├── train.py
 └── util.py
 ```
@@ -19,3 +17,4 @@ Code for (Wasserstein-)BiGAN image compression system to be trained on slide pat
 ```
 python main.py --dataset svhn --image_size 32 --epochs 200
 ```
+*NB: you'll need to create results directories before executing training*

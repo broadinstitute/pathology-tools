@@ -6,7 +6,7 @@ import torch.nn as nn
 from torch.nn import Conv2d, ConvTranspose2d, BatchNorm2d, LeakyReLU, ReLU, Tanh
 from util import DeterministicConditional, GaussianConditional, JointCritic, WALI
 
-def create_encoder(img_size=32, NUM_CHANNELS=3, DIM=128, NLAT=256):
+def create_encoder(img_size=32, NUM_CHANNELS=3, DIM=128, NLAT=256, determ=True):
     mapping = None
     if img_size == 32:
         mapping = nn.Sequential(
@@ -36,7 +36,10 @@ def create_encoder(img_size=32, NUM_CHANNELS=3, DIM=128, NLAT=256):
         raise ValueError('Must specify image size of 32, 64, or 128')
     # Setting E to be a deterministic conditional doesn't employ the reparameterization trick
     # --> This regime has the network learn the latent distribution implicitly, NOT through the parameters
-    return DeterministicConditional(mapping)
+    if determ:
+        return DeterministicConditional(mapping)
+    else:
+        return GaussianConditional(mapping)
 
 def create_generator(img_size=32, NUM_CHANNELS=3, DIM=128, NLAT=256):
     mapping = None
@@ -117,14 +120,13 @@ def create_critic(img_size=32, LEAK=0.2, NUM_CHANNELS=3, DIM=128, NLAT=256):
         raise ValueError('Must specify image size of 32 or 128')
     return JointCritic(x_mapping, z_mapping, joint_mapping)
 
-def create_WALI(img_size=32, lru_slope=0.2, num_channels=3, dim=128, nlat=256):
+def create_WALI(img_size=32, lru_slope=0.2, num_channels=3, dim=128, nlat=256, determ_enc=True):
     '''
     Instantiates the WALI network with the versions of the subnetworks
     that match the image size we'll be getting from the dataset
-    - reconstruction_loss: flag indicating whether to add an MSE
-    term to the G/E loss function
+    - determ_enc: flag for using DeterministicConditional or GaussianConditional for the encoder
     '''
-    E = create_encoder(img_size, num_channels, dim, nlat)
+    E = create_encoder(img_size, num_channels, dim, nlat, determ=determ_enc)
     G = create_generator(img_size, num_channels, dim, nlat)
     C = create_critic(img_size, lru_slope, num_channels, dim, nlat)
     wali = WALI(E, G, C)

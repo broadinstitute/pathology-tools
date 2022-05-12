@@ -39,11 +39,15 @@ class BiGAN_Trainer:
         self.BETA1 = 0.5
         self.BETA2 = 0.9
 
+        # flag to enc architecture to include reparam trick or not
+        self.determ_enc = args.deterministic_encoder
+
         # Patches is the only dataset that doesn't produce labeled data --> this
         # flag will tell us whether or not we need to unpack the elements from the dataloader
         self.LABELED_DATA = (args.dataset != 'patches')
     def train(self):
-        wali = create_WALI(img_size=self.IMAGE_SIZE, lru_slope=self.LEAK, num_channels=self.NUM_CHANNELS, dim=self.DIM, nlat=self.NLAT).to(self.device)
+        wali = create_WALI(img_size=self.IMAGE_SIZE, lru_slope=self.LEAK, num_channels=self.NUM_CHANNELS, dim=self.DIM,
+                           nlat=self.NLAT, determ_enc=self.determ_enc).to(self.device)
     
         optimizerEG = Adam(list(wali.get_encoder_parameters()) + list(wali.get_generator_parameters()),
           lr=self.LEARNING_RATE, betas=(self.BETA1, self.BETA2))
@@ -58,7 +62,6 @@ class BiGAN_Trainer:
         print('Training starts...')
     
         while curr_iter < self.ITER:
-            #for batch_idx, (x, _) in enumerate(self.train_loader, 1):
             for batch_idx, x in enumerate(self.train_loader, 1):
                 if self.LABELED_DATA:
                     # if we're using one of the labeled datasets, need to separate out the data from the label

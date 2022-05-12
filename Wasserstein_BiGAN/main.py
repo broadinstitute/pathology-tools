@@ -20,7 +20,11 @@ if __name__=='__main__':
     parser.add_argument('--dataset_workers', type=int, default=0, help='num_workers for torch dataloader')
     parser.add_argument('--dataset_size', type=int, default=None, help='optional limiting dataset size')
     parser.add_argument('--gpu_id', choices=['0','1','2','3'], default='0', help='GPU where training will be run')
-    #parser.add_argument('--reconstruction_loss', type=bool, default=False, help='flag for using MSE reconstruction loss in G/E')
+    parser.add_argument('--deterministic_encoder', type=bool, default=True,
+                        help='switch for using a deterministic- or gaussian-output encoder')
+    parser.add_argument('--patch_dataset_source_path', type=str,
+                        default='/workdir/crohlice/software/CLAM/TCGA_svs_h5_128/',
+                        help='path to grab the CLAM patch images needed to create the patch dataloader')
 
     args = parser.parse_args()
     device = torch.device('cuda:%s' % args.gpu_id if torch.cuda.is_available() else 'cpu')
@@ -35,7 +39,8 @@ if __name__=='__main__':
     elif args.dataset == 'cifar':
         data = get_cifar(args, size=args.image_size, dataset_size=args.dataset_size, num_workers=num_workers)
     elif args.dataset == 'patches':
-        data = get_patches(args, size=args.image_size, dataset_size=args.dataset_size, num_workers=num_workers)
+        data = get_patches(args, size=args.image_size, dataset_size=args.dataset_size, num_workers=num_workers,
+                           source_path=args.patch_dataset_source_path)
     else:
         raise ValueError('Dataset not set properly')
 

@@ -42,12 +42,18 @@ class BiGAN_Trainer:
         # flag to enc architecture to include reparam trick or not
         self.determ_enc = args.deterministic_encoder
 
+        # flags for DS, feaD, and feaGE reconstruction loss
+        self.DS_recon = args.DS_recon
+        self.feaD_recon = args.feaD_recon
+        self.feaGE_recon = args.feaGE_recon
+
         # Patches is the only dataset that doesn't produce labeled data --> this
         # flag will tell us whether or not we need to unpack the elements from the dataloader
         self.LABELED_DATA = (args.dataset != 'patches')
     def train(self):
         wali = create_WALI(img_size=self.IMAGE_SIZE, lru_slope=self.LEAK, num_channels=self.NUM_CHANNELS, dim=self.DIM,
-                           nlat=self.NLAT, determ_enc=self.determ_enc).to(self.device)
+                           nlat=self.NLAT, determ_enc=self.determ_enc, DS_loss=self.DS_recon, feaD_loss=self.feaD_recon,
+                           feaGE_loss=self.feaGE_recon).to(self.device)
     
         optimizerEG = Adam(list(wali.get_encoder_parameters()) + list(wali.get_generator_parameters()),
           lr=self.LEARNING_RATE, betas=(self.BETA1, self.BETA2))

@@ -110,7 +110,7 @@ class JointCritic(nn.Module):
 
 
 class WALI(nn.Module):
-    def __init__(self, E, G, C):
+    def __init__(self, E, G, C, DS_loss, feaD_loss, feaGE_loss):
         """ Adversarially learned inference (a.k.a. bi-directional GAN) with Wasserstein critic.
 
         Args:
@@ -123,6 +123,11 @@ class WALI(nn.Module):
         self.E = E
         self.G = G
         self.C = C
+
+        # flags for additional reconstruction loss terms
+        self.DS = DS_loss
+        self.feaD = feaD_loss
+        self.feaGE = feaGE_loss
 
     def get_encoder_parameters(self):
         return self.E.parameters()
@@ -149,6 +154,15 @@ class WALI(nn.Module):
         data_preds, sample_preds = output[:x.size(0)], output[x.size(0):]
         return data_preds, sample_preds
 
+    # helper method to get critic feature embeddings for feaD penalty
+    # --> probably more efficient to have criticize() also return these embeddings,
+    # --> but for now want to keep these separate
+    def get_critic_image_embeddings(self, x, x_tilde):
+        input_x = torch.cat((x, x_tilde), dim=0)
+        embeddings = self.C.x_net(input_x)
+        x_emb, x_tilde_emb = embeddings[:len(input_x)//2], embeddings[len(input_x)//2:]
+        return x_emb, x_tilde_emb
+
     def calculate_grad_penalty(self, x, z_hat, x_tilde, z):
         bsize = x.size(0)
         eps = torch.rand(bsize, 1, 1, 1).to(x.device) # eps ~ Unif[0, 1]
@@ -163,9 +177,34 @@ class WALI(nn.Module):
         grad_penalty = ((grads.norm(2, dim=1) - 1) ** 2).mean()
         return grad_penalty
 
+    # Reconstruction penalties for data space, discrim. feature space, and G/E feature space
+    # (Mutlu and Alpaydin, 2020)
+    def calculate_DS_penalty(self, x, x_tilde):
+        # loss term for squared error in image space
+        squared_diff = nn.MSELoss(reduction='sum')
+        return squared_diff(x, x_tilde)
+
+    def calculate_feaD_penalty(self, x, x_tilde):
+        # squared error in feature space defined by a specific point in critic network
+        # --> seems reasonable to compare x and x_tilde at the output of x_mapping in critic
+        squared_diff = nn.MSELoss(reduction='sum')
+        return squared_diff(self.get_critic_image_embeddings(x, x_tilde))
+
+    def calculate_feaGE_penalty(self, x, x_tilde):
+        # squared error in feature space defined by corresponding points in the G and E networks
+        # --> What's the best choice for a point in the network? Half-way though?
+        # TODO: implement embedding mode in the G and E networks that will output representations from inside the model
+        raise NotImplementedError('feaGE not implemented yet')
+
     def forward(self, x, z, lamb=10):
         z_hat, x_tilde = self.encode(x), self.generate(z)
         data_preds, sample_preds = self.criticize(x, z_hat, x_tilde, z)
         EG_loss = torch.mean(data_preds - sample_preds)
+        if self.DS:
+            EG_loss += self.calculate_DS_penalty(x, x_tilde)
+        if self.feaD:
+            EG_loss += self.calculate_feaD_penalty(x, x_tilde)
+        if self.feaGE:
+            EG_loss += self.calculate_feaGE_penalty(x, x_tilde)
         C_loss = -EG_loss + lamb * self.calculate_grad_penalty(x.data, z_hat.data, x_tilde.data, z.data)
         return C_loss, EG_loss

@@ -120,7 +120,8 @@ def create_critic(img_size=32, LEAK=0.2, NUM_CHANNELS=3, DIM=128, NLAT=256):
         raise ValueError('Must specify image size of 32 or 128')
     return JointCritic(x_mapping, z_mapping, joint_mapping)
 
-def create_WALI(img_size=32, lru_slope=0.2, num_channels=3, dim=128, nlat=256, determ_enc=True):
+def create_WALI(img_size=32, lru_slope=0.2, num_channels=3, dim=128, nlat=256, determ_enc=True, DS_loss=False,
+                feaD_loss=False, feaGE_loss=False):
     '''
     Instantiates the WALI network with the versions of the subnetworks
     that match the image size we'll be getting from the dataset
@@ -129,5 +130,5 @@ def create_WALI(img_size=32, lru_slope=0.2, num_channels=3, dim=128, nlat=256, d
     E = create_encoder(img_size, num_channels, dim, nlat, determ=determ_enc)
     G = create_generator(img_size, num_channels, dim, nlat)
     C = create_critic(img_size, lru_slope, num_channels, dim, nlat)
-    wali = WALI(E, G, C)
+    wali = WALI(E, G, C, DS_loss, feaD_loss, feaGE_loss)
     return wali

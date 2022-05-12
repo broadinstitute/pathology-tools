@@ -25,6 +25,12 @@ if __name__=='__main__':
     parser.add_argument('--patch_dataset_source_path', type=str,
                         default='/workdir/crohlice/software/CLAM/TCGA_svs_h5_128/',
                         help='path to grab the CLAM patch images needed to create the patch dataloader')
+    parser.add_argument('--DS_recon', type=bool, default=False,
+                        help='flag for adding DS reconstruction loss to G/E optimization')
+    parser.add_argument('--feaD_recon', type=bool, default=False,
+                        help='flag for adding feaD reconstruction loss to G/E optimization')
+    parser.add_argument('--feaGE_recon', type=bool, default=False,
+                        help='flag for adding GE reconstruction loss to G/E optimization')
 
     args = parser.parse_args()
     device = torch.device('cuda:%s' % args.gpu_id if torch.cuda.is_available() else 'cpu')

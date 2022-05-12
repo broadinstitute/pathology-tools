@@ -34,6 +34,8 @@ def create_encoder(img_size=32, NUM_CHANNELS=3, DIM=128, NLAT=256):
           Conv2d(DIM * 16, NLAT, 1, 1))
     else:
         raise ValueError('Must specify image size of 32, 64, or 128')
+    # Setting E to be a deterministic conditional doesn't employ the reparameterization trick
+    # --> This regime has the network learn the latent distribution implicitly, NOT through the parameters
     return DeterministicConditional(mapping)
 
 def create_generator(img_size=32, NUM_CHANNELS=3, DIM=128, NLAT=256):

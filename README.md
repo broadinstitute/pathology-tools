@@ -47,7 +47,7 @@ high_d_exemplar.pkl             |  low_d_exemplar.pkl
 ![](Pathology-GAN/evaluation_automated_sweep/gen_0_alpha_0.png) | ![](Pathology-GAN/evaluation_automated_sweep/gen_99_alpha_100.png)
 
 ... and the python command given above will generate an `evaluation` directory whose contents should be the same as those given in `evaluation_automated_sweep`.
-![Pathology-GAN/evaluation_automated_sweep/img_sweep.png]
+![](Pathology-GAN/evaluation_automated_sweep/img_sweep.png)
 
 ### Wasserstein_BiGAN
 ```

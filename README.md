@@ -1,8 +1,7 @@
 # HistoGAN
 Experiments for different GAN problems related to histopathology image analysis
 
-## Different experiment directories and contents
-### Pathology-GAN
+## Pathology-GAN
 ```
 ├── CRImage
 ├── data_manipulation
@@ -22,16 +21,16 @@ Experiments for different GAN problems related to histopathology image analysis
     └── PathologyGAN
         └── h224_w224_n3_zdim_200
             └── checkpoints
-                ├── PathologyGAN.ckt.data-00000-of-00001 (download tar file from https://figshare.com/s/0a31)
+                ├── PathologyGAN.ckt.data-00000-of-00001 (download tar file from https://figshare.com/s/0a311b5418f21ab2ebd4)
                 ├── PathologyGAN.ckt.index
                 └── PathologyGAN.ckt.meta
 #---------------------------------
 └── run_pathgan.py
 ```
-#### virtualenv
+### virtualenv
 `requirements.txt` can be used to create an environment via `pip install -r requirements.txt` after creating and activating a blank python virtualenv.
 
-#### Usage
+### Usage
 This code is roughly equivalent to this repository (https://github.com/AdalbertoCq/Pathology-GAN) with slight changes to allow
 for simple generation of example images that interpolate from specified latent vectors.
 
@@ -49,7 +48,7 @@ high_d_exemplar.pkl             |  low_d_exemplar.pkl
 ... and the python command given above will generate an `evaluation` directory whose contents should be the same as those given in `evaluation_automated_sweep`.
 ![](Pathology-GAN/evaluation_automated_sweep/img_sweep.png)
 
-### Wasserstein_BiGAN
+## Wasserstein_BiGAN
 ```
 ├── main.py
 ├── models.py
@@ -58,9 +57,9 @@ high_d_exemplar.pkl             |  low_d_exemplar.pkl
 ├── train.py
 └── util.py
 ```
-#### Conda environment
+### Conda environment
 `environment.yml` can be used to create a conda virtual environment with the necessary packages with `conda env create --file environment.yml`
-#### virtualenv
+### virtualenv
 `requirements.txt` can be used, and OpenSlide needs to be installed separately and can be done so with the conda command `conda install -c conda-forge openslide`.
 
 Code for (Wasserstein-)BiGAN image compression system to be trained on slide patch images, and ultimately used to create a three-dimensional compression of whole-slide images. `main.py` provides all available user-specified experimental settings (as well as default values for the CLI arguments), and an example call that will instantiate and train a BiGAN on the SVHN dataset is

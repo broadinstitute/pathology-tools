@@ -35,8 +35,6 @@ def get_cifar(args, size=128, data_dir='./data/cifar/', dataset_size=None, num_w
     return dataloader
 
 def get_patches(args, size=128, dataset_size=None, num_workers=None, source_path='/workdir/crohlice/software/CLAM/TCGA_svs_h5_128/'):
-    # not sure if the same normalization will make sense with the patches, but trying here just to have this
-    # involve *only* a change in the images themselves
     transform = transforms.Compose([transforms.Resize(size),
                     transforms.ToTensor(),
                     transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])

@@ -14,10 +14,10 @@ torch.manual_seed(1)
 torch.cuda.manual_seed_all(1)
 
 class BiGAN_Trainer:
-    '''
+    """
     Wrapper class for handling the training settings and objects established by CLI
     and created in main.py
-    '''
+    """
     def __init__(self, args, data, device, image_size):
         self.train_loader = data
         self.device = device
@@ -50,6 +50,7 @@ class BiGAN_Trainer:
         # Patches is the only dataset that doesn't produce labeled data --> this
         # flag will tell us whether or not we need to unpack the elements from the dataloader
         self.LABELED_DATA = (args.dataset != 'patches')
+
     def train(self):
         wali = create_WALI(img_size=self.IMAGE_SIZE, lru_slope=self.LEAK, num_channels=self.NUM_CHANNELS, dim=self.DIM,
                            nlat=self.NLAT, determ_enc=self.determ_enc, DS_loss=self.DS_recon, feaD_loss=self.feaD_recon,

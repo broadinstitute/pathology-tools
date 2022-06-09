@@ -29,10 +29,10 @@ class GAN:
 		self.model_name = model_name
 
 		# Input data variables.
-		self.image_height = data.training.patch_h
-		self.image_width = data.training.patch_w
-		self.image_channels = data.training.n_channels
-		self.batch_size = data.training.batch_size
+		self.image_height = data.patch_h #training.patch_h
+		self.image_width = data.patch_w #training.patch_w
+		self.image_channels = data.n_channels #training.n_channels
+		self.batch_size = data.batch_size #training.batch_size
 
 		# Latent space dimensions.
 		self.z_dim = z_dim

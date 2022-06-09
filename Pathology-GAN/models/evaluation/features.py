@@ -23,7 +23,7 @@ def real_samples(data, data_output_path, num_samples=5000):
         os.makedirs(path)
 
     batch_size = data.batch_size
-    images_shape =  [num_samples] + [data.patch_h, data.patch_w, data.n_channels]
+    images_shape = [num_samples] + [data.patch_h, data.patch_w, data.n_channels]
 
     hdf5_sets_path = list()
     dataset_sets_path = [data.hdf5_train, data.hdf5_validation, data.hdf5_test]
@@ -33,7 +33,7 @@ def real_samples(data, data_output_path, num_samples=5000):
         if set_data is None:
             continue
         type_set = set_path.split('_')[-1]
-        type_set = type_set.split('.')[0]   
+        type_set = type_set.split('.')[0]
         img_path = os.path.join(path, 'img_%s' % type_set)
         if not os.path.isdir(img_path):
             os.makedirs(img_path)
@@ -68,7 +68,7 @@ def real_samples(data, data_output_path, num_samples=5000):
 # Extract Inception-V1 features from images in HDF5.
 def inception_tf_feature_activations(hdf5s, input_shape, batch_size):
     images_input = tf.placeholder(dtype=tf.float32, shape=[None] + input_shape, name='images')
-    images = 2*images_input
+    images = 2 * images_input
     images -= 1
     images = tf.image.resize_bilinear(images, [299, 299])
     out_incept_v3 = tfgan.eval.run_inception(images=images, output_tensor='pool_3:0')
@@ -92,22 +92,23 @@ def inception_tf_feature_activations(hdf5s, input_shape, batch_size):
                     flag_images = True
                     storage_name = key.replace('images', 'features')
                     images_storage = hdf5_img_file[key]
-                    
+
                     num_samples = images_storage.shape[0]
-                    batches = int(num_samples/batch_size)
+                    batches = int(num_samples / batch_size)
                     features_shape = (num_samples, 2048)
-                    features_storage = hdf5_features_file.create_dataset(name=storage_name, shape=features_shape, dtype=np.float32)
+                    features_storage = hdf5_features_file.create_dataset(name=storage_name, shape=features_shape,
+                                                                         dtype=np.float32)
 
                     print('Starting features extraction...')
                     print('\tImage File:', hdf5_path)
                     print('\t\tImage type:', key)
                     ind = 0
                     for batch_num in range(batches):
-                        batch_images = images_storage[batch_num*batch_size:(batch_num+1)*batch_size]
+                        batch_images = images_storage[batch_num * batch_size:(batch_num + 1) * batch_size]
                         if np.amax(batch_images) > 1.0:
-                            batch_images = batch_images/255.
+                            batch_images = batch_images / 255.
                         activations = sess.run(out_incept_v3, {images_input: batch_images})
-                        features_storage[batch_num*batch_size:(batch_num+1)*batch_size] = activations
+                        features_storage[batch_num * batch_size:(batch_num + 1) * batch_size] = activations
                         ind += batch_size
                     print('\tFeature File:', hdf5_feature_path)
                     print('\tNumber of samples:', ind)
@@ -115,12 +116,13 @@ def inception_tf_feature_activations(hdf5s, input_shape, batch_size):
                 os.remove(hdf5_features_file)
     return hdf5s_features
 
+
 # Generate random samples from a model, it also dumps a sprite image width them.
 def generate_samples_epoch(session, model, data_shape, epoch, evaluation_path, num_samples=5000, batches=50):
     epoch_path = os.path.join(evaluation_path, 'epoch_%s' % epoch)
     check_epoch_path = os.path.join(epoch_path, 'checkpoints')
     checkpoint_path = os.path.join(evaluation_path, '../checkpoints')
-    
+
     os.makedirs(epoch_path)
     shutil.copytree(checkpoint_path, check_epoch_path)
 
@@ -129,10 +131,10 @@ def generate_samples_epoch(session, model, data_shape, epoch, evaluation_path, n
     else:
         runs = ['unconditional']
 
-    for run in  runs:
+    for run in runs:
 
         hdf5_path = os.path.join(epoch_path, 'hdf5_epoch_%s_gen_images_%s.h5' % (epoch, run))
-        
+
         # H5 File.
         img_shape = [num_samples] + data_shape
         hdf5_file = h5py.File(hdf5_path, mode='w')
@@ -148,9 +150,11 @@ def generate_samples_epoch(session, model, data_shape, epoch, evaluation_path, n
                     labels = np.zeros((batches, 1))
                 labels = tf.keras.utils.to_categorical(y=labels, num_classes=2)
             else:
-                label_input=None
-                labels=None
-            gen_samples, _ = show_generated(session=session, z_input=model.z_input, z_dim=model.z_dim, output_fake=model.output_gen, label_input=label_input, labels=labels, n_images=batches, show=False)
+                label_input = None
+                labels = None
+            gen_samples, _ = show_generated(session=session, z_input=model.z_input, z_dim=model.z_dim,
+                                            output_fake=model.output_gen, label_input=label_input, labels=labels,
+                                            n_images=batches, show=False)
 
             for i in range(batches):
                 if ind == num_samples:
@@ -160,7 +164,8 @@ def generate_samples_epoch(session, model, data_shape, epoch, evaluation_path, n
 
 
 # Generate sampeles from PathologyGAN, no encoder.
-def generate_samples_from_checkpoint(model, data, data_out_path, checkpoint, num_samples=5000, batches=50, exemplar1=None, exemplar2=None):
+def generate_samples_from_checkpoint(model, data, data_out_path, checkpoint, num_samples=5000, batches=50,
+                                     exemplar1=None, exemplar2=None):
     print(f'data.dataset = {data.dataset}')
     print(f'data.marker = {data.marker}')
     path = os.path.join(data_out_path, 'evaluation')
@@ -177,19 +182,19 @@ def generate_samples_from_checkpoint(model, data, data_out_path, checkpoint, num
         os.makedirs(img_path)
 
     hdf5_path = os.path.join(path, 'hdf5_%s_%s_images_%s.h5' % (data.dataset, data.marker, model.model_name))
-    
+
     # Lazy access to one set of images, not used at all, just filling tensorflows complains.
-    #ds_o = data.training
-    #if ds_o is None:
+    # ds_o = data.training
+    # if ds_o is None:
     #    ds_o = data.test
-    #if ds_o is None:
+    # if ds_o is None:
     #    ds_o = data.validation
-    #for batch_images, batch_labels in ds_o:
+    # for batch_images, batch_labels in ds_o:
     #    break
 
     if not os.path.isfile(hdf5_path):
         # H5 File specifications and creation.
-        #img_shape = [num_samples] + data.test.shape[1:]
+        # img_shape = [num_samples] + data.test.shape[1:]
         img_shape = [num_samples] + [data.patch_h, data.patch_w, data.n_channels]
         print(f'img_shape = {img_shape}')
         latent_shape = [num_samples] + [model.z_dim]
@@ -210,12 +215,14 @@ def generate_samples_from_checkpoint(model, data, data_out_path, checkpoint, num
 
             ind = 0
             while ind < num_samples:
-                
+
                 # Image and latent generation for PathologyGAN.
                 if model.model_name == 'BigGAN':
-                    z_latent_batch = np.random.normal(size=(batches, model.z_dim))
-                    feed_dict = {model.z_input:z_latent_batch, model.real_images:batch_images}
-                    gen_img_batch = session.run([model.output_gen], feed_dict=feed_dict)[0]
+                    raise Exception(
+                        'Sample generation in BigGAN mode hasnt been tested without input data - use StylePathologyGAN')
+                    # z_latent_batch = np.random.normal(size=(batches, model.z_dim))
+                    # feed_dict = {model.z_input:z_latent_batch, model.real_images:batch_images}
+                    # gen_img_batch = session.run([model.output_gen], feed_dict=feed_dict)[0]
 
                 # Image and latent generation for StylePathologyGAN.
                 else:
@@ -223,8 +230,10 @@ def generate_samples_from_checkpoint(model, data, data_out_path, checkpoint, num
                     if exemplar1 is not None and exemplar2 is not None:
                         print('Generating image interpolations from exemplars')
                         interpolation_weights = np.linspace(0.0, 1.0, num=batches)
-                        printable_alphas = {i:round(interpolation_weights[i], 2) for i in range(len(interpolation_weights))}
-                        z_latent_batch = np.array([alpha*exemplar1 + (1-alpha)*exemplar2 for alpha in interpolation_weights])
+                        printable_alphas = {i: round(interpolation_weights[i], 2) for i in
+                                            range(len(interpolation_weights))}
+                        z_latent_batch = np.array(
+                            [alpha * exemplar1 + (1 - alpha) * exemplar2 for alpha in interpolation_weights])
                     else:
                         z_latent_batch = np.random.normal(size=(batches, model.z_dim))
                     # ------- saving ordered dict with latent codes for generated images -------
@@ -233,10 +242,10 @@ def generate_samples_from_checkpoint(model, data, data_out_path, checkpoint, num
                     with open(f'{img_path}/latents_dict_{ind}.pkl', 'wb') as handle:
                         pickle.dump(latents_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)
                     # --------------------------------------------------------------------------
-                    feed_dict = {model.z_input_1: z_latent_batch}#, model.real_images:batch_images}
+                    feed_dict = {model.z_input_1: z_latent_batch}  # , model.real_images:batch_images}
                     w_latent_batch = session.run([model.w_latent_out], feed_dict=feed_dict)[0]
-                    w_latent_in = np.tile(w_latent_batch[:,:, np.newaxis], [1, 1, model.layers+1])
-                    feed_dict = {model.w_latent_in:w_latent_in}#, model.real_images:batch_images}
+                    w_latent_in = np.tile(w_latent_batch[:, :, np.newaxis], [1, 1, model.layers + 1])
+                    feed_dict = {model.w_latent_in: w_latent_in}  # , model.real_images:batch_images}
                     gen_img_batch = session.run([model.output_gen], feed_dict=feed_dict)[0]
 
                 # Fill in storage for latent and image.
@@ -248,7 +257,8 @@ def generate_samples_from_checkpoint(model, data, data_out_path, checkpoint, num
                     if 'PathologyGAN' in model.model_name:
                         w_storage[ind] = w_latent_batch[i, :]
                     # going to add (10*) the alpha value to the image name for easy cross-reference
-                    plt.imsave('%s/gen_%s_alpha_%s.png' % (img_path, ind, int(100*printable_alphas[ind])), gen_img_batch[i, :, :, :])
+                    plt.imsave('%s/gen_%s_alpha_%s.png' % (img_path, ind, int(100 * printable_alphas[ind])),
+                               gen_img_batch[i, :, :, :])
                     # plt.imsave('%s/gen_%s.png' % (img_path, ind), gen_img_batch[i, :, :, :])
                     ind += 1
         print(ind, 'Generated Images')
@@ -258,6 +268,7 @@ def generate_samples_from_checkpoint(model, data, data_out_path, checkpoint, num
         print('\tFile:', hdf5_path)
 
     return hdf5_path
+
 
 # Generate and encode samples from PathologyGAN, with an encoder.
 def generate_encode_samples_from_checkpoint(model, data, data_out_path, checkpoint, num_samples=5000, batches=50):
@@ -274,7 +285,7 @@ def generate_encode_samples_from_checkpoint(model, data, data_out_path, checkpoi
         os.makedirs(img_path)
 
     hdf5_path = os.path.join(path, 'hdf5_%s_%s_images_%s.h5' % (data.dataset, data.marker, model.model_name))
-    
+
     # Lazy access to one set of images, not used at all, just filling tensorflows complains.
     batch_images = np.ones((data.batch_size, data.patch_h, data.patch_w, data.n_channels))
 
@@ -302,24 +313,24 @@ def generate_encode_samples_from_checkpoint(model, data, data_out_path, checkpoi
 
             ind = 0
             while ind < num_samples:
-                
+
                 # W latent.
                 z_latent_batch = np.random.normal(size=(batches, model.z_dim))
                 feed_dict = {model.z_input_1: z_latent_batch}
                 w_latent_batch = session.run([model.w_latent_out], feed_dict=feed_dict)[0]
-                w_latent_in = np.tile(w_latent_batch[:,:, np.newaxis], [1, 1, model.layers+1])
+                w_latent_in = np.tile(w_latent_batch[:, :, np.newaxis], [1, 1, model.layers + 1])
 
                 # Generate images from W latent space.
-                feed_dict = {model.w_latent_in:w_latent_in}
+                feed_dict = {model.w_latent_in: w_latent_in}
                 gen_img_batch = session.run([model.output_gen], feed_dict=feed_dict)[0]
 
                 # Encode generated images into W' latent space.
-                feed_dict = {model.real_images_2:gen_img_batch}
+                feed_dict = {model.real_images_2: gen_img_batch}
                 w_latent_prime_batch = session.run([model.w_latent_e_out], feed_dict=feed_dict)[0]
-                w_latent_prime_in = np.tile(w_latent_prime_batch[:,:, np.newaxis], [1, 1, model.layers+1])
+                w_latent_prime_in = np.tile(w_latent_prime_batch[:, :, np.newaxis], [1, 1, model.layers + 1])
 
                 # Generate images from W' latent space.
-                feed_dict = {model.w_latent_in:w_latent_prime_in}
+                feed_dict = {model.w_latent_in: w_latent_prime_in}
                 gen_img_prime_batch = session.run([model.output_gen], feed_dict=feed_dict)[0]
 
                 # Fill in storage for latent and image.
@@ -346,8 +357,10 @@ def generate_encode_samples_from_checkpoint(model, data, data_out_path, checkpoi
 
     return hdf5_path
 
+
 # Encode real images and regenerate from PathologyGAN, with an encoder.
-def real_encode_eval_from_checkpoint(model, data, data_out_path, checkpoint, real_hdf5, type_set, num_samples=5000, batches=50):
+def real_encode_eval_from_checkpoint(model, data, data_out_path, checkpoint, real_hdf5, type_set, num_samples=5000,
+                                     batches=50):
     path = os.path.join(data_out_path, 'evaluation')
     path = os.path.join(path, model.model_name)
     path = os.path.join(path, data.dataset)
@@ -365,8 +378,9 @@ def real_encode_eval_from_checkpoint(model, data, data_out_path, checkpoint, rea
         exit()
     real_images = read_hdf5(real_hdf5, 'images')
 
-    hdf5_path = os.path.join(path, 'hdf5_%s_%s_real_%s_images_%s.h5' % (data.dataset, data.marker, type_set, model.model_name))
-    
+    hdf5_path = os.path.join(path, 'hdf5_%s_%s_real_%s_images_%s.h5' % (
+    data.dataset, data.marker, type_set, model.model_name))
+
     # Lazy access to one set of images, not used at all, just filling tensorflows complains.
     batch_images = np.ones((data.batch_size, data.patch_h, data.patch_w, data.n_channels))
 
@@ -396,23 +410,23 @@ def real_encode_eval_from_checkpoint(model, data, data_out_path, checkpoint, rea
 
                 # Real images.
                 if (ind + batches) < len(real_images):
-                    real_img_batch = real_images[ind: ind+batches, :, :, :]/255.
+                    real_img_batch = real_images[ind: ind + batches, :, :, :] / 255.
                 else:
-                    real_img_batch = real_images[ind:, :, :, :]/255.
+                    real_img_batch = real_images[ind:, :, :, :] / 255.
 
                 # Encode real images into W latent space.
-                feed_dict = {model.real_images_2:real_img_batch}
+                feed_dict = {model.real_images_2: real_img_batch}
                 w_latent_batch = session.run([model.w_latent_e_out], feed_dict=feed_dict)[0]
-                w_latent_in = np.tile(w_latent_batch[:,:, np.newaxis], [1, 1, model.layers+1])
+                w_latent_in = np.tile(w_latent_batch[:, :, np.newaxis], [1, 1, model.layers + 1])
 
                 # Generate images from W latent space.
-                feed_dict = {model.w_latent_in:w_latent_in}
+                feed_dict = {model.w_latent_in: w_latent_in}
                 recon_img_batch = session.run([model.output_gen], feed_dict=feed_dict)[0]
 
                 # Encode reconstructed images into W' latent space.
-                feed_dict = {model.real_images_2:recon_img_batch}
+                feed_dict = {model.real_images_2: recon_img_batch}
                 w_latent_prime_batch = session.run([model.w_latent_e_out], feed_dict=feed_dict)[0]
-                w_latent_prime_in = np.tile(w_latent_prime_batch[:,:, np.newaxis], [1, 1, model.layers+1])
+                w_latent_prime_in = np.tile(w_latent_prime_batch[:, :, np.newaxis], [1, 1, model.layers + 1])
 
                 # Fill in storage for latent and image.
                 for i in range(batches):
@@ -421,7 +435,7 @@ def real_encode_eval_from_checkpoint(model, data, data_out_path, checkpoint, rea
                     # Real Images.
                     img_storage[ind] = real_img_batch[i, :, :, :]
                     w_storage[ind] = w_latent_batch[i, :]
-                    
+
                     # Reconstructed images.
                     img_prime_storage[ind] = recon_img_batch[i, :, :, :]
                     w_prime_storage[ind] = w_latent_prime_batch[i, :]
@@ -437,6 +451,7 @@ def real_encode_eval_from_checkpoint(model, data, data_out_path, checkpoint, rea
         print('\tFile:', hdf5_path)
 
     return hdf5_path
+
 
 # Encode real images for prognosis.
 def real_encode_from_checkpoint(model, data, data_out_path, checkpoint, real_hdf5, batches=50, save_img=False):
@@ -467,21 +482,21 @@ def real_encode_from_checkpoint(model, data, data_out_path, checkpoint, real_hdf
 
     # Lazy access to one set of images, not used at all, just filling tensorflows complains.
     batch_images = np.ones((data.batch_size, data.patch_h, data.patch_w, data.n_channels))
-    
+
     if not os.path.isfile(hdf5_path):
         # H5 File specifications and creation.
         img_shape = real_images.shape
         labels_shape = real_labels.shape
         latent_shape = [num_samples] + [model.z_dim]
         with h5py.File(hdf5_path, mode='w') as hdf5_file:
-        
+
             # Reconstructed generated images.
             img_storage = hdf5_file.create_dataset(name='images_prime', shape=img_shape, dtype=np.float32)
             labels_storage = hdf5_file.create_dataset(name='labels', shape=labels_shape, dtype=np.float32)
             w_storage = hdf5_file.create_dataset(name='w_latent', shape=latent_shape, dtype=np.float32)
             if real_names is not None:
                 dt = h5py.special_dtype(vlen=str)
-                names_storage = hdf5_file.create_dataset(name='file_name', shape=(num_samples,1), dtype=dt)
+                names_storage = hdf5_file.create_dataset(name='file_name', shape=(num_samples, 1), dtype=dt)
 
             print('Generated Images path:', img_path)
             print('H5 File path:', hdf5_path)
@@ -500,22 +515,22 @@ def real_encode_from_checkpoint(model, data, data_out_path, checkpoint, real_hdf
 
                     # Real images.
                     if (ind + batches) < len(real_images):
-                        real_img_batch = real_images[ind: ind+batches, :, :, :]/255.
-                        real_labels_batch = real_labels[ind: ind+batches, :]
-                        if real_names is not None: real_names_batch = real_names[ind: ind+batches, :]
-                        
+                        real_img_batch = real_images[ind: ind + batches, :, :, :] / 255.
+                        real_labels_batch = real_labels[ind: ind + batches, :]
+                        if real_names is not None: real_names_batch = real_names[ind: ind + batches, :]
+
                     else:
-                        real_img_batch = real_images[ind:, :, :, :]/255.
+                        real_img_batch = real_images[ind:, :, :, :] / 255.
                         real_labels_batch = real_labels[ind:, :]
                         if real_names is not None: real_names_batch = real_names[ind:, :]
 
                     # Encode real images into W latent space.
-                    feed_dict = {model.real_images_2:real_img_batch}
+                    feed_dict = {model.real_images_2: real_img_batch}
                     w_latent_batch = session.run([model.w_latent_e_out], feed_dict=feed_dict)[0]
-                    w_latent_in = np.tile(w_latent_batch[:,:, np.newaxis], [1, 1, model.layers+1])
+                    w_latent_in = np.tile(w_latent_batch[:, :, np.newaxis], [1, 1, model.layers + 1])
 
                     # Generate images from W latent space.
-                    feed_dict = {model.w_latent_in:w_latent_in}
+                    feed_dict = {model.w_latent_in: w_latent_in}
                     recon_img_batch = session.run([model.output_gen], feed_dict=feed_dict)[0]
 
                     # Fill in storage for latent and image.
@@ -534,7 +549,7 @@ def real_encode_from_checkpoint(model, data, data_out_path, checkpoint, real_hdf
                             plt.imsave('%s/real_recon_%s.png' % (img_path, ind), recon_img_batch[i, :, :, :])
                         ind += 1
 
-                    if ind%10000==0: print('Processed', ind, 'images')
+                    if ind % 10000 == 0: print('Processed', ind, 'images')
 
         print(ind, 'Encoded Images')
     else:

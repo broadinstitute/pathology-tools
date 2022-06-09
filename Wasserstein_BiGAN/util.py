@@ -73,6 +73,7 @@ class GaussianConditional(nn.Module):
         assert list(self.shift.data.size()) == list(value.size())
         self.shift.data = value
 
+    # Forward pass in the Gaussian conditional includes the reparameterization trick
     def forward(self, input):
         params = self.mapping(input)
         nlatent = params.size(1) // 2
@@ -184,6 +185,7 @@ class WALI(nn.Module):
         squared_diff = nn.MSELoss(reduction='mean')
         return squared_diff(x, x_tilde)
 
+    # TODO: investigate; this is causing divergence in training
     def calculate_feaD_penalty(self, x, x_tilde):
         # squared error in feature space defined by a specific point in critic network
         # --> seems reasonable to compare x and x_tilde at the output of x_mapping in critic

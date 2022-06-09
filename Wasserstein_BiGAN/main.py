@@ -7,9 +7,9 @@ import torch
 from preprocess import get_svhn, get_cifar, get_patches
 from train import BiGAN_Trainer
 
-if __name__=='__main__':
+if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--dataset', choices=['patches','svhn', 'cifar'], default='svhn',
+    parser.add_argument('--dataset', choices=['patches', 'svhn', 'cifar'], default='svhn',
                         help='Dataset - options: patches, cifar, svhn')
     parser.add_argument('--image_size', type=int, choices=[32, 64, 128], default=128)
     parser.add_argument('--batch_size', type=int, default=64, help='Batch size')
@@ -19,7 +19,7 @@ if __name__=='__main__':
     parser.add_argument('--results_dir', default='./scratch_results')
     parser.add_argument('--dataset_workers', type=int, default=0, help='num_workers for torch dataloader')
     parser.add_argument('--dataset_size', type=int, default=None, help='optional limiting dataset size')
-    parser.add_argument('--gpu_id', choices=['0','1','2','3'], default='0', help='GPU where training will be run')
+    parser.add_argument('--gpu_id', choices=['0', '1', '2', '3'], default='0', help='GPU where training will be run')
     parser.add_argument('--deterministic_encoder', type=bool, default=True,
                         help='switch for using a deterministic- or gaussian-output encoder')
     parser.add_argument('--patch_dataset_source_path', type=str,

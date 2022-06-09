@@ -229,11 +229,26 @@ def generate_samples_from_checkpoint(model, data, data_out_path, checkpoint, num
                     # if exemplars are given then we'll generate a batch made up of the different linear combinations of them
                     if exemplar1 is not None and exemplar2 is not None:
                         print('Generating image interpolations from exemplars')
+                        # build batches-length lists of exemplars to be combined in the generation process
+                        # --> If a single exemplar is given for each group, every new latent will be a weighted average
+                        # of those; if multiple are given for each group, each new latent will be a weighted avg of
+                        # a random draw from either group
+                        if len(exemplar1.shape) == 1:
+                            exemplar1_list = [exemplar1] * batches
+                        else:
+                            exemplar1_list = [exemplar1[np.random.randint(0, exemplar1.shape[0])] for _ in range(batches)]
+                        if len(exemplar2.shape) == 1:
+                            exemplar2_list = [exemplar2] * batches
+                        else:
+                            exemplar2_list = [exemplar2[np.random.randint(0, exemplar2.shape[0])] for _ in range(batches)]
                         interpolation_weights = np.linspace(0.0, 1.0, num=batches)
                         printable_alphas = {i: round(interpolation_weights[i], 2) for i in
                                             range(len(interpolation_weights))}
+                        # z_latent_batch = np.array(
+                        #     [alpha * exemplar1 + (1 - alpha) * exemplar2 for alpha in interpolation_weights])
                         z_latent_batch = np.array(
-                            [alpha * exemplar1 + (1 - alpha) * exemplar2 for alpha in interpolation_weights])
+                            [interpolation_weights[i] * exemplar1_list[i] + (1 - interpolation_weights[i]) * exemplar2_list[i]
+                             for i in range(batches)])
                     else:
                         z_latent_batch = np.random.normal(size=(batches, model.z_dim))
                     # ------- saving ordered dict with latent codes for generated images -------

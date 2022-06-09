@@ -49,9 +49,9 @@ with open(exemplar2, 'rb') as f:
 assert len(exemplar1_latent) == z_dim and len(exemplar2_latent) == z_dim, 'input exemplar latent must have dimension equal to z_dim'
 
 if main_path is None:
-	main_path = os.path.dirname(os.path.realpath(__file__))
+    main_path = os.path.dirname(os.path.realpath(__file__))
 if dbs_path is None:
-	dbs_path = os.path.dirname(os.path.realpath(__file__))
+    dbs_path = os.path.dirname(os.path.realpath(__file__))
 
 # Dataset information.
 data_out_path = os.path.join(main_path, 'data_model_output')

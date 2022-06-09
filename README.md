@@ -29,7 +29,7 @@ Experiments for different GAN problems related to histopathology image analysis
 └── run_pathgan.py
 ```
 #### virtualenv
-`requirements.txt` can be used to create an environment via `pip install -r requirements.txt` after creating and activating a blank python virtualenv.
+`requirements.txt` can be used to create an environment via `pip install -r requirements.txt` after creating and activating a blank python (version 3.6.8) virtualenv.
 
 #### Usage
 This code is roughly equivalent to this repository (https://github.com/AdalbertoCq/Pathology-GAN) with slight changes to allow

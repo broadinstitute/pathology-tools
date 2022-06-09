@@ -181,14 +181,14 @@ class WALI(nn.Module):
     # (Mutlu and Alpaydin, 2020)
     def calculate_DS_penalty(self, x, x_tilde):
         # loss term for squared error in image space
-        squared_diff = nn.MSELoss(reduction='sum')
+        squared_diff = nn.MSELoss(reduction='mean')
         return squared_diff(x, x_tilde)
 
     def calculate_feaD_penalty(self, x, x_tilde):
         # squared error in feature space defined by a specific point in critic network
         # --> seems reasonable to compare x and x_tilde at the output of x_mapping in critic
-        squared_diff = nn.MSELoss(reduction='sum')
-        return squared_diff(self.get_critic_image_embeddings(x, x_tilde))
+        squared_diff = nn.MSELoss(reduction='mean')
+        return squared_diff(*self.get_critic_image_embeddings(x, x_tilde))
 
     def calculate_feaGE_penalty(self, x, x_tilde):
         # squared error in feature space defined by corresponding points in the G and E networks

@@ -244,11 +244,14 @@ def generate_samples_epoch(session, model, data_shape, epoch, evaluation_path, n
 
 # Generate sampeles from PathologyGAN, no encoder.
 def generate_samples_from_checkpoint(model, data, data_out_path, checkpoint, num_samples=5000, batches=50, exemplar1=None, exemplar2=None):
+    print(f'data.dataset = {data.dataset}')
+    print(f'data.marker = {data.marker}')
     path = os.path.join(data_out_path, 'evaluation')
     path = os.path.join(path, model.model_name)
     path = os.path.join(path, data.dataset)
     path = os.path.join(path, data.marker)
     res = 'h%s_w%s_n%s_zdim%s' % (data.patch_h, data.patch_w, data.n_channels, model.z_dim)
+    print(f'res = {res}')
     path = os.path.join(path, res)
     img_path = os.path.join(path, 'generated_images')
     if not os.path.isdir(path):
@@ -259,17 +262,19 @@ def generate_samples_from_checkpoint(model, data, data_out_path, checkpoint, num
     hdf5_path = os.path.join(path, 'hdf5_%s_%s_images_%s.h5' % (data.dataset, data.marker, model.model_name))
     
     # Lazy access to one set of images, not used at all, just filling tensorflows complains.
-    ds_o = data.training
-    if ds_o is None:
-        ds_o = data.test
-    if ds_o is None:
-        ds_o = data.validation
-    for batch_images, batch_labels in ds_o:
-        break
-    
+    #ds_o = data.training
+    #if ds_o is None:
+    #    ds_o = data.test
+    #if ds_o is None:
+    #    ds_o = data.validation
+    #for batch_images, batch_labels in ds_o:
+    #    break
+
     if not os.path.isfile(hdf5_path):
         # H5 File specifications and creation.
-        img_shape = [num_samples] + data.test.shape[1:]
+        #img_shape = [num_samples] + data.test.shape[1:]
+        img_shape = [num_samples] + [data.patch_h, data.patch_w, data.n_channels]
+        print(f'img_shape = {img_shape}')
         latent_shape = [num_samples] + [model.z_dim]
         hdf5_file = h5py.File(hdf5_path, mode='w')
         img_storage = hdf5_file.create_dataset(name='images', shape=img_shape, dtype=np.float32)
@@ -311,10 +316,10 @@ def generate_samples_from_checkpoint(model, data, data_out_path, checkpoint, num
                     with open(f'{img_path}/latents_dict_{ind}.pkl', 'wb') as handle:
                         pickle.dump(latents_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)
                     # --------------------------------------------------------------------------
-                    feed_dict = {model.z_input_1: z_latent_batch, model.real_images:batch_images}
+                    feed_dict = {model.z_input_1: z_latent_batch}#, model.real_images:batch_images}
                     w_latent_batch = session.run([model.w_latent_out], feed_dict=feed_dict)[0]
                     w_latent_in = np.tile(w_latent_batch[:,:, np.newaxis], [1, 1, model.layers+1])
-                    feed_dict = {model.w_latent_in:w_latent_in, model.real_images:batch_images}
+                    feed_dict = {model.w_latent_in:w_latent_in}#, model.real_images:batch_images}
                     gen_img_batch = session.run([model.output_gen], feed_dict=feed_dict)[0]
 
                 # Fill in storage for latent and image.

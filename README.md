@@ -11,6 +11,8 @@ Experiments for different GAN problems related to histopathology image analysis
 ├── generate_image_interpolation.py
 ├── high_d_exemplar.pkl
 ├── low_d_exemplar.pkl
+├── high_d_cluster.pkl
+├── low_d_cluster.pkl
 ├── models
 ├── quantify_model_pipeline.py
 ├── real_features.py
@@ -47,6 +49,14 @@ high_d_exemplar.pkl             |  low_d_exemplar.pkl
 
 ... and the python command given above will generate an `evaluation` directory whose contents should be the same as those given in `evaluation_automated_sweep`.
 ![](Pathology-GAN/evaluation_automated_sweep/img_sweep.png)
+
+`generate_image_interpolation.py` can also be called with multiple exemplar latents given in both input slots (that is, pickle files containing
+numpy arrays of shape `(n, z_dim)` for `n` the number of exemplars given). This will result in the image generation process
+drawing random combinations of latents from the two groups and generating new latents by taking weighted averages in the same way as the previous
+interpolation example. A call to the script under this mode can be made using the example pickle files `low_d_cluster.pkl` and `high_d_cluster.pkl`:
+```
+python ./generate_image_interpolation.py --num_samples 100 --z_dim 200 --checkpoint data_model_output/PathologyGAN/h224_w224_n3_zdim_200/checkpoints/PathologyGAN.ckt --exemplar1 low_d_cluster.pkl --exemplar2 high_d_cluster.pkl
+```
 
 ## Wasserstein_BiGAN
 ```

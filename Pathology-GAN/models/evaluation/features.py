@@ -180,15 +180,6 @@ def generate_samples_from_checkpoint(model, data, data_out_path, checkpoint, num
 
     hdf5_path = os.path.join(path, 'hdf5_%s_%s_images_%s.h5' % (data.dataset, data.marker, model.model_name))
 
-    # Lazy access to one set of images, not used at all, just filling tensorflows complains.
-    # ds_o = data.training
-    # if ds_o is None:
-    #    ds_o = data.test
-    # if ds_o is None:
-    #    ds_o = data.validation
-    # for batch_images, batch_labels in ds_o:
-    #    break
-
     if not os.path.isfile(hdf5_path):
         # H5 File specifications and creation.
         img_shape = [num_samples] + [data.patch_h, data.patch_w, data.n_channels]
@@ -231,17 +222,11 @@ def generate_samples_from_checkpoint(model, data, data_out_path, checkpoint, num
                         if len(exemplar1.shape) == 1:
                             exemplar1_list = [exemplar1] * batches
                         else:
-                            # exemplar1_list = [exemplar1[np.random.randint(0, exemplar1.shape[0])] for _ in range(batches)]
-                            ex_choices = np.random.randint(0, exemplar1.shape[0], size=batches)
-                            print(f'ex_choices (1) = {ex_choices}')
-                            exemplar1_list = [exemplar1[i] for i in ex_choices]
+                            exemplar1_list = [exemplar1[i] for i in np.random.randint(0, exemplar1.shape[0], size=batches)]
                         if len(exemplar2.shape) == 1:
                             exemplar2_list = [exemplar2] * batches
                         else:
-                            # exemplar2_list = [exemplar2[np.random.randint(0, exemplar2.shape[0])] for _ in range(batches)]
-                            ex_choices = np.random.randint(0, exemplar2.shape[0], size=batches)
-                            print(f'ex_choices (2) = {ex_choices}')
-                            exemplar2_list = [exemplar2[i] for i in ex_choices]
+                            exemplar2_list = [exemplar2[i] for i in np.random.randint(0, exemplar2.shape[0], size=batches)]
                         interpolation_weights = np.linspace(0.0, 1.0, num=batches)
                         printable_alphas = {i: round(interpolation_weights[i], 2) for i in
                                             range(len(interpolation_weights))}

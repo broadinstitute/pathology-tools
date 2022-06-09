@@ -166,14 +166,11 @@ def generate_samples_epoch(session, model, data_shape, epoch, evaluation_path, n
 # Generate sampeles from PathologyGAN, no encoder.
 def generate_samples_from_checkpoint(model, data, data_out_path, checkpoint, num_samples=5000, batches=50,
                                      exemplar1=None, exemplar2=None):
-    print(f'data.dataset = {data.dataset}')
-    print(f'data.marker = {data.marker}')
     path = os.path.join(data_out_path, 'evaluation')
     path = os.path.join(path, model.model_name)
     path = os.path.join(path, data.dataset)
     path = os.path.join(path, data.marker)
     res = 'h%s_w%s_n%s_zdim%s' % (data.patch_h, data.patch_w, data.n_channels, model.z_dim)
-    print(f'res = {res}')
     path = os.path.join(path, res)
     img_path = os.path.join(path, 'generated_images')
     if not os.path.isdir(path):
@@ -194,9 +191,7 @@ def generate_samples_from_checkpoint(model, data, data_out_path, checkpoint, num
 
     if not os.path.isfile(hdf5_path):
         # H5 File specifications and creation.
-        # img_shape = [num_samples] + data.test.shape[1:]
         img_shape = [num_samples] + [data.patch_h, data.patch_w, data.n_channels]
-        print(f'img_shape = {img_shape}')
         latent_shape = [num_samples] + [model.z_dim]
         hdf5_file = h5py.File(hdf5_path, mode='w')
         img_storage = hdf5_file.create_dataset(name='images', shape=img_shape, dtype=np.float32)
@@ -236,11 +231,17 @@ def generate_samples_from_checkpoint(model, data, data_out_path, checkpoint, num
                         if len(exemplar1.shape) == 1:
                             exemplar1_list = [exemplar1] * batches
                         else:
-                            exemplar1_list = [exemplar1[np.random.randint(0, exemplar1.shape[0])] for _ in range(batches)]
+                            # exemplar1_list = [exemplar1[np.random.randint(0, exemplar1.shape[0])] for _ in range(batches)]
+                            ex_choices = np.random.randint(0, exemplar1.shape[0], size=batches)
+                            print(f'ex_choices (1) = {ex_choices}')
+                            exemplar1_list = [exemplar1[i] for i in ex_choices]
                         if len(exemplar2.shape) == 1:
                             exemplar2_list = [exemplar2] * batches
                         else:
-                            exemplar2_list = [exemplar2[np.random.randint(0, exemplar2.shape[0])] for _ in range(batches)]
+                            # exemplar2_list = [exemplar2[np.random.randint(0, exemplar2.shape[0])] for _ in range(batches)]
+                            ex_choices = np.random.randint(0, exemplar2.shape[0], size=batches)
+                            print(f'ex_choices (2) = {ex_choices}')
+                            exemplar2_list = [exemplar2[i] for i in ex_choices]
                         interpolation_weights = np.linspace(0.0, 1.0, num=batches)
                         printable_alphas = {i: round(interpolation_weights[i], 2) for i in
                                             range(len(interpolation_weights))}

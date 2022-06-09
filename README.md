@@ -1,4 +1,4 @@
-# HistoGAN
+# PurityGAN
 Experiments for different GAN problems related to histopathology image analysis
 
 ## Pathology-GAN

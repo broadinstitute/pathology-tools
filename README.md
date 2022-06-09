@@ -15,7 +15,7 @@ Experiments for different GAN problems related to histopathology image analysis
 ├── quantify_model_pipeline.py
 ├── real_features.py
 #------ To download and add ------
-├── dataset
+├── dataset (not necessary for generate_image_interpolation.py but may be for other functions)
     └── vgh_nki (download from https://drive.google.com/open?id=1LpgW85CVA48C8LnpmsDMdHqeCGHKsAxw) 
 ├── data_model_output
     └── PathologyGAN

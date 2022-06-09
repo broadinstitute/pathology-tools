@@ -87,4 +87,6 @@ with tf.Graph().as_default():
 
 # Generate Inception features from fake images.
 with tf.Graph().as_default():
-    hdf5s_features = inception_tf_feature_activations(hdf5s=[gen_hdf5_path], input_shape=data.training.shape[1:], batch_size=num_samples)
+    hdf5s_features = inception_tf_feature_activations(hdf5s=[gen_hdf5_path],
+                                                      input_shape=[data.patch_h, data.patch_w, data.n_channels],
+                                                      batch_size=num_samples)

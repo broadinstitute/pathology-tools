@@ -18,9 +18,10 @@ import random
 import openslide
 
 class BLCA_CL_Dataset(object):
-    def __init__(self, path, mode='Train', train_prop=0.8, transform=None):
+    def __init__(self, path, mode='Train', train_prop=0.8, transform=None, convert_to_RGB=True):
         self.root = path
         self.data_transformation = transform
+        self.convert_to_RGB = convert_to_RGB
         files = os.listdir(self.root)
         h5s = [x for x in files if '.h5' in x] #<- whole-slide images
         # patient labels from the .h5 files -- given by the first three substrings in the filename
@@ -62,7 +63,10 @@ class BLCA_CL_Dataset(object):
             transform = self.data_transformation
             current_patch = self.coords_all[idx]
             slide = openslide.OpenSlide(self.root+current_patch[0][:-3]+'.svs')
-            img = slide.read_region(tuple(current_patch[1]), current_patch[2], tuple([current_patch[3], current_patch[3]])).convert('RGB')
+            img = slide.read_region(tuple(current_patch[1]), current_patch[2],
+                                    tuple([current_patch[3], current_patch[3]]))
+            if self.convert_to_RGB:
+                img = img.convert('RGB')
             # if the dataset is instantiated with a transform function then we'll use it, otherwise we create on just consisting of ToTensor
             if not transform:
                 transform = transforms.Compose([transforms.ToTensor()])

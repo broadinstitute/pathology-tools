@@ -72,7 +72,7 @@ class BLCA_CL_Dataset(object):
             img = slide.read_region(tuple(current_patch[1]), current_patch[2], tuple([current_patch[3], current_patch[3]])).convert('RGB')
             # if we want images in the format required by PathologyGAN, we just cast the PIL RGB images to numpy arrays
             if self.return_PIL_format:
-                if not self.resize_dim:
+                if self.resize_dim is not None:
                     # PIL.Image has resize functions, ANTIALIAS is supposed to be best for scaling down
                     img = img.resize((self.resize_dim, self.resize_dim), Image.ANTIALIAS)
                 return np.array(img)

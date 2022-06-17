@@ -56,7 +56,7 @@ class BLCA_CL_Dataset(object):
                 data = list(f[a_group_key])
 
                 for k in data:
-                    self.coords_all.append([j,k, patch_level, patch_size])
+                    self.coords_all.append([j, k, patch_level, patch_size])
 
     def __getitem__(self, idx):
             transform = self.data_transformation
@@ -73,6 +73,11 @@ class BLCA_CL_Dataset(object):
     def __len__(self):
         # Length of dataset given by number of overall number of patches across all slides
         return len(self.coords_all)
+
+def construct_hdf5_datasets(output_prefix, train_prop=0.8, img_dim=224):
+    # function to create hdf5 files containing training and testing image datasets
+    # -> Intended to create datasets files in format required by PathologyGAN training procedure
+    pass
 
 if __name__=='__main__':
     seed = 1234

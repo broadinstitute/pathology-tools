@@ -23,7 +23,7 @@ data_out_path = os.path.join(data_out_path, model)
 image_width = 224
 image_height = 224
 image_channels = 3
-dataset='vgh_nki'
+dataset='tcga' #'vgh_nki'
 marker='he'
 name_run = 'h%s_w%s_n%s' % (image_height, image_width, image_channels)
 data_out_path = '%s/%s' % (data_out_path, name_run)
@@ -44,8 +44,12 @@ gp_coeff = .65
 use_bn = False
 loss_type = 'relativistic gradient penalty'
 
-data = Data(dataset=dataset, marker=marker, patch_h=image_height, patch_w=image_width, n_channels=image_channels, batch_size=batch_size, project_path=dbs_path)
+# setting labels flag to False if we give 'tcga' as our dataset (because those don't have labels)
+data = Data(dataset=dataset, marker=marker, patch_h=image_height, patch_w=image_width, n_channels=image_channels,
+            batch_size=batch_size, project_path=dbs_path, labels=(dataset == 'vgh_nki'))
 
 with tf.Graph().as_default():
-    pathgan = PathologyGAN(data=data, z_dim=z_dim, layers=layers, use_bn=use_bn, alpha=alpha, beta_1=beta_1, learning_rate_g=learning_rate_g, learning_rate_d=learning_rate_d, beta_2=beta_2, n_critic=n_critic, gp_coeff=gp_coeff, loss_type=loss_type, model_name=model)
+    pathgan = PathologyGAN(data=data, z_dim=z_dim, layers=layers, use_bn=use_bn, alpha=alpha, beta_1=beta_1,
+                           learning_rate_g=learning_rate_g, learning_rate_d=learning_rate_d, beta_2=beta_2,
+                           n_critic=n_critic, gp_coeff=gp_coeff, loss_type=loss_type, model_name=model)
     losses = pathgan.train(epochs, data_out_path, data, restore, print_epochs=10, n_images=10, show_epochs=None)

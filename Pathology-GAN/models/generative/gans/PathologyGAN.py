@@ -152,11 +152,7 @@ class PathologyGAN(GAN):
 		self.train_discriminator, self.train_generator = self.optimization()
 
 	# Train function.
-	def train(self, epochs, data_out_path, data, restore, show_epochs=100, print_epochs=10, n_images=10, save_img=False,
-			  tracking=False, evaluation=None, labeled_data=True):
-		# labeled_data flag to indicate whether intput dataset is given with label in need of unpacking. TCGA
-		# data will not be given with labels so in that case the training method will be called with labeled_data=False
-		# and that will result in the extra unpacking step to be skipped
+	def train(self, epochs, data_out_path, data, restore, show_epochs=100, print_epochs=10, n_images=10, save_img=False, tracking=False, evaluation=None):
 		run_epochs = 0    
 		saver = tf.train.Saver()
 
@@ -194,12 +190,7 @@ class PathologyGAN(GAN):
 				saver.save(sess=session, save_path=checkpoints)
 				
 				# Batch Iteration.
-				for batch_images in data.training:
-					if labeled_data:
-						# if the input dataset is given as (image, label) tuples then we unpack here
-						# NB: batch_labels object does not appear to be used anywhere, this unpacking step
-						# is just to preserve the original version of this code as closely as possible
-						batch_images, batch_labels = batch_images
+				for batch_images, batch_labels in data.training:
 					# Inputs.
 					z_batch_1 = np.random.normal(size=(self.batch_size, self.z_dim)) 
 					z_batch_2 = np.random.normal(size=(self.batch_size, self.z_dim)) 

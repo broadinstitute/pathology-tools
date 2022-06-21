@@ -36,7 +36,8 @@ learning_rate_d = 1e-4
 beta_1 = 0.5
 beta_2 = 0.9
 # Setting restore to True so the training method looks for a model checkpoint at data_out_path/checkpoints to start training from
-restore = True #False
+restore = checkpoint is not None #False
+print(f'run_pathgan.py called with restore={restore}')
 
 # Model
 layers = 5

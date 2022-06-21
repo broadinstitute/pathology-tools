@@ -33,7 +33,8 @@ learning_rate_g = 1e-4
 learning_rate_d = 1e-4
 beta_1 = 0.5
 beta_2 = 0.9
-restore = False
+# Setting restore to True so the training method looks for a model checkpoint at data_out_path/checkpoints to start training from
+restore = True #False
 
 # Model
 layers = 5

@@ -170,6 +170,7 @@ class PathologyGAN(GAN):
 
 			# Restore previous session.
 			if restore:
+				print('Training called with restore=True; looking for checkpoint to load')
 				check = get_checkpoint(data_out_path)
 				saver.restore(session, check)
 				print('Restored model: %s' % check)

@@ -9,10 +9,12 @@ parser = argparse.ArgumentParser(description='PathologyGAN trainer.')
 parser.add_argument('--epochs', dest='epochs', type=int, default=45, help='Number epochs to run: default is 45 epochs.')
 parser.add_argument('--batch_size', dest='batch_size', type=int, default=64, help='Batch size, default size is 64.')
 parser.add_argument('--model', dest='model', type=str, default='PathologyGAN', help='Model name.')
+parser.add_argument('--checkpoint', dest='checkpoint', required=False, help='Path to pre-trained weights (.ckt) of PathologyGAN.')
 args = parser.parse_args()
 epochs = args.epochs
 batch_size = args.batch_size
 model = args.model
+checkpoint = args.checkpoint
 
 main_path = os.path.dirname(os.path.realpath(__file__))
 dbs_path = os.path.dirname(os.path.realpath(__file__))
@@ -53,4 +55,5 @@ with tf.Graph().as_default():
     pathgan = PathologyGAN(data=data, z_dim=z_dim, layers=layers, use_bn=use_bn, alpha=alpha, beta_1=beta_1,
                            learning_rate_g=learning_rate_g, learning_rate_d=learning_rate_d, beta_2=beta_2,
                            n_critic=n_critic, gp_coeff=gp_coeff, loss_type=loss_type, model_name=model)
-    losses = pathgan.train(epochs, data_out_path, data, restore, print_epochs=10, n_images=10, show_epochs=None)
+    losses = pathgan.train(epochs, data_out_path, data, restore, print_epochs=10, n_images=10, show_epochs=None,
+                           check=checkpoint)

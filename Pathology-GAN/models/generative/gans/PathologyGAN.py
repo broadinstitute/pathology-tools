@@ -152,7 +152,8 @@ class PathologyGAN(GAN):
 		self.train_discriminator, self.train_generator = self.optimization()
 
 	# Train function.
-	def train(self, epochs, data_out_path, data, restore, show_epochs=100, print_epochs=10, n_images=10, save_img=False, tracking=False, evaluation=None):
+	def train(self, epochs, data_out_path, data, restore, show_epochs=100, print_epochs=10, n_images=10, save_img=False,
+			  tracking=False, evaluation=None, check=None):
 		run_epochs = 0    
 		saver = tf.train.Saver()
 
@@ -170,8 +171,9 @@ class PathologyGAN(GAN):
 
 			# Restore previous session.
 			if restore:
+				assert check is not None, "If restore==True, must provide checkpoint path in check argument"
 				print('Training called with restore=True; looking for checkpoint to load')
-				check = get_checkpoint(data_out_path)
+				# check = get_checkpoint(data_out_path)
 				saver.restore(session, check)
 				print('Restored model: %s' % check)
 

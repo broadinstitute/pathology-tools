@@ -1,4 +1,3 @@
-# This looks like a way of emulating tf version 1 from version 2
 import tensorflow.compat.v1 as tf
 # import tensorflow as tf
 import numpy as np

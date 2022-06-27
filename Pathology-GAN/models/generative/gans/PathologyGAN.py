@@ -1,6 +1,6 @@
 # This looks like a way of emulating tf version 1 from version 2
-# import tensorflow.compat.v1 as tf
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
+# import tensorflow as tf
 import numpy as np
 from data_manipulation.utils import *
 from models.evaluation.features import *
@@ -190,7 +190,7 @@ class PathologyGAN(GAN):
 
 			# Epoch Iteration.
 			for epoch in range(1, epochs+1):
-
+				print(f'STARTING EPOCH {epoch}')
 				saver.save(sess=session, save_path=checkpoints)
 				
 				# Batch Iteration.

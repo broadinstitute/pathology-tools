@@ -4,9 +4,6 @@ import argparse
 from data_manipulation.data import Data
 from models.generative.gans.PathologyGAN import PathologyGAN
 
-# I think these might be necessary to enable tensorflow to see the GPUs
-# import os
-# os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 parser = argparse.ArgumentParser(description='PathologyGAN trainer.')
 parser.add_argument('--epochs', dest='epochs', type=int, default=45, help='Number epochs to run: default is 45 epochs.')

@@ -179,7 +179,7 @@ class PathologyGAN(GAN):
 				print('Restored model: %s' % check)
 
 			# Saving graph details.
-			writer = tf.summary.FileWriter(os.path.join(data_out_path, 'tensorboard'), graph_def=session.graph_def)	
+			# writer = tf.summary.FileWriter(os.path.join(data_out_path, 'tensorboard'), graph_def=session.graph_def)
 
 			# Steady latent input
 			batch_images = np.ones((self.batch_size, self.image_height, self.image_width, self.image_channels))

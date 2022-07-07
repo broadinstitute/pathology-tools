@@ -219,9 +219,11 @@ class PathologyGAN(GAN):
 				data.training.reset()
 
 				# After each epoch dump a sample of generated images.
-				gen_samples = session.run([self.output_gen], feed_dict=feed_dict)[0]
-				write_sprite_image(filename=os.path.join(data_out_path, 'images/gen_samples_epoch_%s.png' % epoch), data=gen_samples, metadata=False)
+				## --> I think this is duplicated by the below write_image command in the current form of this code
+				# gen_samples = session.run([self.output_gen], feed_dict=feed_dict)[0]
+				# write_sprite_image(filename=os.path.join(data_out_path, 'images/gen_samples_epoch_%s.png' % epoch), data=gen_samples, metadata=False)
 
+				# TODO: do side-by-side of input-output images
 				feed_dict = {self.z_input_1: steady_latent_1, self.real_images:batch_images}
 				w_latent_out = session.run([self.w_latent_out], feed_dict=feed_dict)[0]
 				w_latent_in = np.tile(w_latent_out[:,:, np.newaxis], [1, 1, self.layers+1])

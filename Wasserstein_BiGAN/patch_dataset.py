@@ -111,7 +111,9 @@ def construct_hdf5_datasets(output_prefix, train_prop=0.8, img_dim=224, max_data
         trainset_size = len(train_dataset)
         # testset_size = len(test_dataset)
 
-    for i in range(trainset_size):
+    print(f'Training set size = {trainset_size}')
+
+    for i in tqdm(range(trainset_size)):
         train_list.append(train_dataset.__getitem__(i))
     # for i in range(testset_size):
     #     test_list.append(test_dataset.__getitem__(i))

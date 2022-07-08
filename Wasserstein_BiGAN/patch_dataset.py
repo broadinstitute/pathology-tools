@@ -47,11 +47,9 @@ class BLCA_CL_Dataset(object):
             h5s_pat = h5s_pat[int(train_prop*len(h5s_pat)):]
 
         # Select the WSIs for which the patient label is found in the set of approved patient labels (h5s_pat)
-        final_list = [ele for ele in h5s if any([pref in ele for pref in h5s_pat])]
-        #print(final_list)
-        # final_list is currently in such a form that it will be equivalent to h5s_pat
-        # --> it's written this way to allow the specification of specific allow-lists of patient labels
-        assert set(final_list) == h5s_pat, "final_list != h5s_pat"
+        # final_list = [ele for ele in h5s if any([pref in ele for pref in h5s_pat])]
+        final_list = h5s
+        print(f'Number of .h5 files being included in {mode} dataset = {len(final_list)}')
 
         self.coords_all = []
 

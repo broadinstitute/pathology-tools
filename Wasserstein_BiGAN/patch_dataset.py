@@ -97,32 +97,32 @@ def construct_hdf5_datasets(output_prefix, train_prop=0.8, img_dim=224, max_data
     # generate dataset objects that return numpy array images in the format and size required by PathologyGAN
     train_dataset = BLCA_CL_Dataset('/workdir/crohlice/software/CLAM/TCGA_svs_h5_256/', train_prop=train_prop,
                                     mode='Train', return_PIL=True, resize_dim=img_dim)
-    test_dataset = BLCA_CL_Dataset('/workdir/crohlice/software/CLAM/TCGA_svs_h5_256/', train_prop=train_prop,
-                                    mode='Test', return_PIL=True, resize_dim=img_dim)
+    # test_dataset = BLCA_CL_Dataset('/workdir/crohlice/software/CLAM/TCGA_svs_h5_256/', train_prop=train_prop,
+    #                                 mode='Test', return_PIL=True, resize_dim=img_dim)
 
     # initialize and populate lists of images
     train_list = []
-    test_list = []
+    # test_list = []
     # impose optional maximum dataset size (to allow for small dataset sizes when experimenting)
     if max_dataset_size:
         trainset_size = min(len(train_dataset), max_dataset_size)
-        testset_size = min(len(test_dataset), max_dataset_size)
+        # testset_size = min(len(test_dataset), max_dataset_size)
     else:
         trainset_size = len(train_dataset)
-        testset_size = len(test_dataset)
+        # testset_size = len(test_dataset)
 
     for i in range(trainset_size):
         train_list.append(train_dataset.__getitem__(i))
-    for i in range(testset_size):
-        test_list.append(test_dataset.__getitem__(i))
+    # for i in range(testset_size):
+    #     test_list.append(test_dataset.__getitem__(i))
 
     # save datasets to hdf5
     with h5py.File(output_prefix+'_train.h5', 'w') as f:
         train_dset = f.create_dataset('images', data=np.array(train_list))
         f.close()
-    with h5py.File(output_prefix + '_test.h5', 'w') as f:
-        test_dset = f.create_dataset('images', data=np.array(test_list))
-        f.close()
+    # with h5py.File(output_prefix + '_test.h5', 'w') as f:
+    #     test_dset = f.create_dataset('images', data=np.array(test_list))
+    #     f.close()
 
 if __name__=='__main__':
     # --- setting the main method to generate hdf5 datasets in format for pathology-gan training ---

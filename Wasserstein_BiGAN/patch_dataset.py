@@ -78,17 +78,31 @@ class BLCA_CL_Dataset(object):
                 if self.resize_dim is not None:
                     # PIL.Image has resize functions, ANTIALIAS is supposed to be best for scaling down
                     img = img.resize((self.resize_dim, self.resize_dim), Image.ANTIALIAS)
-                return np.array(img)
+                    # *** Adding print statements revealing the source slide and current_patch for patches whose green channel
+                    # has an average value > 200 (over a random 5000 sample, the avg/std is 183/29)
+                    np_img = np.array(img)
+                    if np.mean(np_img[:, :, 1]) > 200:
+                        print(f'{slide}\t{current_patch}')
+                return np_img #np.array(img)
+
             # if the dataset is instantiated with a transform function then we'll use it, otherwise we create on just consisting of ToTensor
             if not transform:
                 transform = transforms.Compose([transforms.ToTensor()])
                 return transform(img)
             else:
                 return transform(img)
-        
+
     def __len__(self):
         # Length of dataset given by number of overall number of patches across all slides
         return len(self.coords_all)
+
+def detect_green():
+    # function to identify slide and patch coordinates of TCGA patches appearing green
+    dataset = BLCA_CL_Dataset('/workdir/crohlice/software/CLAM/TCGA_svs_h5_256/', train_prop=1.0, mode='Train',
+                              return_PIL=True, resize_dim=224)
+    # iterate over dataset to accumulate the print statements identifying green patches
+    for i in range(len(dataset)):
+        dataset.__getitem__(i)
 
 def construct_hdf5_datasets(output_prefix, train_prop=0.8, img_dim=224, max_dataset_size=10000):
     # function to create hdf5 files containing training and testing image datasets
@@ -134,14 +148,17 @@ def construct_hdf5_datasets(output_prefix, train_prop=0.8, img_dim=224, max_data
     #     f.close()
 
 if __name__=='__main__':
+    # --- running detect_green method to accumulate file of green patches and their slides/coordinates ---
+    detect_green()
+
     # --- setting the main method to generate hdf5 datasets in format for pathology-gan training ---
-    construct_hdf5_datasets('/workdir/crohlice/scripts/PurityGAN/Pathology-GAN/dataset/tcga/he/patches_h224_w224/hdf5_compression_test',
+    # construct_hdf5_datasets('/workdir/crohlice/scripts/PurityGAN/Pathology-GAN/dataset/tcga/he/patches_h224_w224/hdf5_compression_test',
                             train_prop=1.0)
     # ----------------------------------------------------------------------------------------------
     # seed = 1234
     # pl.seed_everything(seed)
     # BATCH_SIZE=64
-    
+
     # patch_dataset_train = BLCA_CL_Dataset('/workdir/crohlice/software/CLAM/TCGA_svs_h5_128/', mode='Train') ### put this as the folder with H5 files
     # patch_dataloader_train = DataLoader(patch_dataset_train, batch_size=BATCH_SIZE, shuffle=True)
 

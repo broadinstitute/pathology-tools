@@ -90,7 +90,7 @@ class BLCA_CL_Dataset(object):
         # Length of dataset given by number of overall number of patches across all slides
         return len(self.coords_all)
 
-def construct_hdf5_datasets(output_prefix, train_prop=0.8, img_dim=224, max_dataset_size=None):
+def construct_hdf5_datasets(output_prefix, train_prop=0.8, img_dim=224, max_dataset_size=10000):
     # function to create hdf5 files containing training and testing image datasets
     # -> Intended to create datasets files in format required by PathologyGAN training procedure
 
@@ -120,15 +120,22 @@ def construct_hdf5_datasets(output_prefix, train_prop=0.8, img_dim=224, max_data
 
     # save datasets to hdf5
     with h5py.File(output_prefix+'_train.h5', 'w') as f:
-        train_dset = f.create_dataset('images', data=np.array(train_list))
+        # train_dset = f.create_dataset('images', data=np.array(train_list))
+        f.create_dataset('images', data=np.array(train_list))
         f.close()
+    # checking difference in hdf5 file size with and without chunking
+    with h5py.File(output_prefix + '_train_chunked.h5', 'w') as f:
+        f.create_dataset('images', data=np.array(train_list), chunks=True)
+        f.close()
+
+
     # with h5py.File(output_prefix + '_test.h5', 'w') as f:
     #     test_dset = f.create_dataset('images', data=np.array(test_list))
     #     f.close()
 
 if __name__=='__main__':
     # --- setting the main method to generate hdf5 datasets in format for pathology-gan training ---
-    construct_hdf5_datasets('/workdir/crohlice/scripts/PurityGAN/Pathology-GAN/dataset/tcga/he/patches_h224_w224/hdf5_tcga_he_',
+    construct_hdf5_datasets('/workdir/crohlice/scripts/PurityGAN/Pathology-GAN/dataset/tcga/he/patches_h224_w224/hdf5_compression_test',
                             train_prop=1.0)
     # ----------------------------------------------------------------------------------------------
     # seed = 1234

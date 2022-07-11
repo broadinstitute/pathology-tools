@@ -53,7 +53,8 @@ class BLCA_CL_Dataset(object):
 
         self.coords_all = []
 
-        for j in tqdm(final_list):
+        # for j in tqdm(final_list):
+        for j in final_list:
             with h5py.File(self.root+j, "r") as f:
                 # List all groups
                 #print("Keys: %s" % f.keys())
@@ -153,7 +154,7 @@ if __name__=='__main__':
 
     # --- setting the main method to generate hdf5 datasets in format for pathology-gan training ---
     # construct_hdf5_datasets('/workdir/crohlice/scripts/PurityGAN/Pathology-GAN/dataset/tcga/he/patches_h224_w224/hdf5_compression_test',
-                            train_prop=1.0)
+    #                         train_prop=1.0)
     # ----------------------------------------------------------------------------------------------
     # seed = 1234
     # pl.seed_everything(seed)

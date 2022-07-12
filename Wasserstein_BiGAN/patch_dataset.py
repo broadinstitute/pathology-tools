@@ -93,6 +93,17 @@ class BLCA_CL_Dataset(object):
             else:
                 return transform(img)
 
+    def get_specific_item(self, slide_path, x, y, resize_dim):
+        # helper method to generate patch images from slide/coord inputs -- being used to check the patches
+        # identified as green by the detect_green method
+        patch_coords = np.array([int(x), int(y)])
+        slide = openslide.OpenSlide(self.root + slide_path[:-3] + '.svs')
+        img = slide.read_region(tuple(patch_coords), 0, tuple([256, 256])).convert('RGB')
+        if self.return_PIL_format:
+            if self.resize_dim is not None:
+                img = img.resize((resize_dim, resize_dim), Image.ANTIALIAS)
+            return np.array(img)
+
     def __len__(self):
         # Length of dataset given by number of overall number of patches across all slides
         return len(self.coords_all)
@@ -104,6 +115,20 @@ def detect_green():
     # iterate over dataset to accumulate the print statements identifying green patches
     for i in range(len(dataset)):
         dataset.__getitem__(i)
+
+def generate_green_patches(patch_csv, output_dim, output_file):
+    # method to parse csv with lines in the format "slide_path, x_coord, y_coord"
+    # and output a pickle file with the numpy array images
+    dataset = BLCA_CL_Dataset('/workdir/crohlice/software/CLAM/TCGA_svs_h5_256/', train_prop=1.0, mode='Train',
+                              return_PIL=True, resize_dim=output_dim)
+    patch_list = []
+    with open(patch_csv) as f:
+        for line in tqdm(f):
+            ln = line.split(',')
+            patch_list.append(dataset.get_specific_item(ln[0], ln[1], ln[2], output_dim))
+    # write output file to numpy binary .npy file
+    with open(output_file) as g:
+        np.save(g, np.array(patch_list))
 
 def construct_hdf5_datasets(output_prefix, train_prop=0.8, img_dim=224, max_dataset_size=10000):
     # function to create hdf5 files containing training and testing image datasets
@@ -149,8 +174,8 @@ def construct_hdf5_datasets(output_prefix, train_prop=0.8, img_dim=224, max_data
     #     f.close()
 
 if __name__=='__main__':
-    # --- running detect_green method to accumulate file of green patches and their slides/coordinates ---
-    detect_green()
+    # --- generating patches identified as green by looking for patches with avg green value > 200 ---
+    generate_green_patches('slide_green_patch_coords.csv', 16, 'green_patches.npy')
 
     # --- setting the main method to generate hdf5 datasets in format for pathology-gan training ---
     # construct_hdf5_datasets('/workdir/crohlice/scripts/PurityGAN/Pathology-GAN/dataset/tcga/he/patches_h224_w224/hdf5_compression_test',

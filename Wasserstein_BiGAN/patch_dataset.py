@@ -127,7 +127,7 @@ def generate_green_patches(patch_csv, output_dim, output_file):
             ln = line.split(',')
             patch_list.append(dataset.get_specific_item(ln[0], ln[1], ln[2], output_dim))
     # write output file to numpy binary .npy file
-    with open(output_file) as g:
+    with open(output_file, 'wb') as g:
         np.save(g, np.array(patch_list))
 
 def construct_hdf5_datasets(output_prefix, train_prop=0.8, img_dim=224, max_dataset_size=10000):

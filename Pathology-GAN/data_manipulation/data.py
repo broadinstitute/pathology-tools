@@ -26,10 +26,13 @@ class Data:
 
         # Train dataset
         self.hdf5_train = os.path.join(self.pathes_path, 'hdf5_%s_train.h5' % self.dataset_name)
+        print(f'data.hdf5_train = {self.hdf5_train}')
         self.training = None
         if os.path.isfile(self.hdf5_train):
             print('SETTING DATA.TRAINING ATTRIBUTE')
             self.training = Dataset(self.hdf5_train, patch_h, patch_w, n_channels, batch_size=batch_size, thresholds=thresholds, labels=labels, empty=empty)
+        else:
+            print(f'os.path.isfile(self.hdf5_train) == False')
         
         # Validation dataset, some datasets work with those.
         self.hdf5_validation = os.path.join(self.pathes_path, 'hdf5_%s_validation.h5' % self.dataset_name)

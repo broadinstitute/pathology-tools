@@ -79,12 +79,7 @@ class BLCA_CL_Dataset(object):
                 if self.resize_dim is not None:
                     # PIL.Image has resize functions, ANTIALIAS is supposed to be best for scaling down
                     img = img.resize((self.resize_dim, self.resize_dim), Image.ANTIALIAS)
-                    # *** Adding print statements revealing the source slide and current_patch for patches whose green channel
-                    # has an average value > 200 (over a random 5000 sample, the avg/std is 183/29)
-                    np_img = np.array(img)
-                    if np.mean(np_img[:, :, 1]) > 200:
-                        print(f'{slide}\t{current_patch}')
-                return np_img #np.array(img)
+                return np.array(img)
 
             # if the dataset is instantiated with a transform function then we'll use it, otherwise we create on just consisting of ToTensor
             if not transform:
@@ -130,42 +125,31 @@ def generate_green_patches(patch_csv, output_dim, output_file):
     with open(output_file, 'wb') as g:
         np.save(g, np.array(patch_list))
 
-def construct_hdf5_datasets(output_prefix, train_prop=0.8, img_dim=224, max_dataset_size=10000):
+def construct_hdf5_datasets(output_prefix, train_prop=1.0, img_dim=224, max_dataset_size=10000):
     # function to create hdf5 files containing training and testing image datasets
     # -> Intended to create datasets files in format required by PathologyGAN training procedure
 
     # generate dataset objects that return numpy array images in the format and size required by PathologyGAN
     train_dataset = BLCA_CL_Dataset('/workdir/crohlice/software/CLAM/TCGA_svs_h5_256/', train_prop=train_prop,
                                     mode='Train', return_PIL=True, resize_dim=img_dim)
-    # test_dataset = BLCA_CL_Dataset('/workdir/crohlice/software/CLAM/TCGA_svs_h5_256/', train_prop=train_prop,
-    #                                 mode='Test', return_PIL=True, resize_dim=img_dim)
 
     # initialize and populate lists of images
     train_list = []
-    # test_list = []
     # impose optional maximum dataset size (to allow for small dataset sizes when experimenting)
     if max_dataset_size:
         trainset_size = min(len(train_dataset), max_dataset_size)
-        # testset_size = min(len(test_dataset), max_dataset_size)
     else:
         trainset_size = len(train_dataset)
-        # testset_size = len(test_dataset)
 
     print(f'Training set size = {trainset_size}')
 
     for i in tqdm(range(trainset_size)):
         train_list.append(train_dataset.__getitem__(i))
-    # for i in range(testset_size):
-    #     test_list.append(test_dataset.__getitem__(i))
 
     # save datasets to hdf5
     with h5py.File(output_prefix+'_train.h5', 'w') as f:
         # train_dset = f.create_dataset('images', data=np.array(train_list))
         f.create_dataset('images', data=np.array(train_list))
-        f.close()
-    # checking difference in hdf5 file size with and without chunking
-    with h5py.File(output_prefix + '_train_chunked.h5', 'w') as f:
-        f.create_dataset('images', data=np.array(train_list), chunks=True)
         f.close()
 
 

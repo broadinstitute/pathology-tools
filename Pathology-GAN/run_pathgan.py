@@ -10,6 +10,7 @@ parser.add_argument('--epochs', dest='epochs', type=int, default=45, help='Numbe
 parser.add_argument('--batch_size', dest='batch_size', type=int, default=64, help='Batch size, default size is 64.')
 parser.add_argument('--model', dest='model', type=str, default='PathologyGAN', help='Model name.')
 parser.add_argument('--checkpoint', dest='checkpoint', required=False, help='Path to pre-trained weights (.ckt) of PathologyGAN.')
+parser.add_argument('--dataset', dest='dataset', type=str, help='Dataset/directory name for he slide h5 dataset')
 args = parser.parse_args()
 epochs = args.epochs
 batch_size = args.batch_size
@@ -25,8 +26,8 @@ data_out_path = os.path.join(data_out_path, model)
 image_width = 224
 image_height = 224
 image_channels = 3
-dataset='tcga' #'vgh_nki'
-marker='he'
+dataset = args.dataset #'tcga' #'vgh_nki'
+marker = 'he'
 name_run = 'h%s_w%s_n%s' % (image_height, image_width, image_channels)
 data_out_path = '%s/%s' % (data_out_path, name_run)
 

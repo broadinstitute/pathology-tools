@@ -162,7 +162,7 @@ if __name__=='__main__':
     # generate_green_patches('slide_green_patch_coords.csv', 16, 'green_patches.npy')
 
     # --- setting the main method to generate hdf5 datasets in format for pathology-gan training ---
-    construct_hdf5_datasets('/workdir/crohlice/scripts/PurityGAN/Pathology-GAN/dataset/tcga/he/patches_h224_w224/hdf5',
+    construct_hdf5_datasets('/workdir/crohlice/scripts/PurityGAN/Pathology-GAN/dataset/tcga/he/patches_h224_w224/hdf5_tcga_he',
                             train_prop=1.0, max_dataset_size=500000)
     # ----------------------------------------------------------------------------------------------
     # seed = 1234

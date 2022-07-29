@@ -125,7 +125,7 @@ def generate_green_patches(patch_csv, output_dim, output_file):
     with open(output_file, 'wb') as g:
         np.save(g, np.array(patch_list))
 
-def construct_hdf5_datasets(output_prefix, train_prop=1.0, img_dim=224, max_dataset_size=10000):
+def construct_hdf5_datasets(output_prefix, train_prop=1.0, img_dim=224, max_dataset_size=None):
     # function to create hdf5 files containing training and testing image datasets
     # -> Intended to create datasets files in format required by PathologyGAN training procedure
 
@@ -149,7 +149,7 @@ def construct_hdf5_datasets(output_prefix, train_prop=1.0, img_dim=224, max_data
     # save datasets to hdf5
     with h5py.File(output_prefix+'_train.h5', 'w') as f:
         # train_dset = f.create_dataset('images', data=np.array(train_list))
-        f.create_dataset('images', data=np.array(train_list))
+        f.create_dataset('images', data=np.array(train_list), compression='gzip')
         f.close()
 
 
@@ -159,11 +159,11 @@ def construct_hdf5_datasets(output_prefix, train_prop=1.0, img_dim=224, max_data
 
 if __name__=='__main__':
     # --- generating patches identified as green by looking for patches with avg green value > 200 ---
-    generate_green_patches('slide_green_patch_coords.csv', 16, 'green_patches.npy')
+    # generate_green_patches('slide_green_patch_coords.csv', 16, 'green_patches.npy')
 
     # --- setting the main method to generate hdf5 datasets in format for pathology-gan training ---
-    # construct_hdf5_datasets('/workdir/crohlice/scripts/PurityGAN/Pathology-GAN/dataset/tcga/he/patches_h224_w224/hdf5_compression_test',
-    #                         train_prop=1.0)
+    construct_hdf5_datasets('/workdir/crohlice/scripts/PurityGAN/Pathology-GAN/dataset/tcga/he/patches_h224_w224/hdf5',
+                            train_prop=1.0, max_dataset_size=500000)
     # ----------------------------------------------------------------------------------------------
     # seed = 1234
     # pl.seed_everything(seed)

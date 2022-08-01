@@ -189,12 +189,12 @@ class PathologyGAN(GAN):
             w_latent_in = np.tile(w_latent_out[:,:, np.newaxis], [1, 1, self.layers+1])
 
             # Epoch Iteration.
-            for epoch in tqdm(range(1, epochs+1)):
+            for epoch in range(1, epochs+1):
                 print(f'STARTING EPOCH {epoch}')
                 saver.save(sess=session, save_path=checkpoints)
 
                 # Batch Iteration.
-                for batch_images, batch_labels in data.training:
+                for batch_images, batch_labels in tqdm(data.training):
                     # Inputs.
                     z_batch_1 = np.random.normal(size=(self.batch_size, self.z_dim))
                     z_batch_2 = np.random.normal(size=(self.batch_size, self.z_dim))

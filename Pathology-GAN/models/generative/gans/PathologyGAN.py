@@ -15,6 +15,7 @@ from models.generative.optimizer import *
 from models.generative.discriminator import *
 from models.generative.generator import *
 from models.generative.gans.GAN import GAN
+from tqdm import tqdm
 
 
 '''
@@ -188,7 +189,7 @@ class PathologyGAN(GAN):
             w_latent_in = np.tile(w_latent_out[:,:, np.newaxis], [1, 1, self.layers+1])
 
             # Epoch Iteration.
-            for epoch in range(1, epochs+1):
+            for epoch in tqdm(range(1, epochs+1)):
                 print(f'STARTING EPOCH {epoch}')
                 saver.save(sess=session, save_path=checkpoints)
 
@@ -223,7 +224,6 @@ class PathologyGAN(GAN):
                 # gen_samples = session.run([self.output_gen], feed_dict=feed_dict)[0]
                 # write_sprite_image(filename=os.path.join(data_out_path, 'images/gen_samples_epoch_%s.png' % epoch), data=gen_samples, metadata=False)
 
-                # TODO: do side-by-side of input-output images
                 feed_dict = {self.z_input_1: steady_latent_1, self.real_images:batch_images}
                 w_latent_out = session.run([self.w_latent_out], feed_dict=feed_dict)[0]
                 w_latent_in = np.tile(w_latent_out[:,:, np.newaxis], [1, 1, self.layers+1])

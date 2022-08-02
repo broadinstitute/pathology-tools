@@ -1,9 +1,12 @@
 import os
-from data_manipulation.dataset import Dataset
+from data_manipulation.dataset import Dataset, Generator_Dataset
 
 
 class Data:
-    def __init__(self, dataset, marker, patch_h, patch_w, n_channels, batch_size, project_path=os.getcwd(), thresholds=(), labels=True, empty=False):
+    def __init__(self, dataset, marker, patch_h, patch_w, n_channels, batch_size, project_path=os.getcwd(),
+                 thresholds=(), labels=True, empty=False, use_generator_dataset=False):
+        # Adding the `use_generator_dataset` flag to trigger the alternate dataset class that uses a tensorflow
+        # generator object to more efficiently open/traverse the hdf5 dataset file
 
         # Directories and file name handling.
         self.dataset = dataset
@@ -30,7 +33,10 @@ class Data:
         self.training = None
         if os.path.isfile(self.hdf5_train):
             print('SETTING DATA.TRAINING ATTRIBUTE')
-            self.training = Dataset(self.hdf5_train, patch_h, patch_w, n_channels, batch_size=batch_size, thresholds=thresholds, labels=labels, empty=empty)
+            if use_generator_dataset:
+                self.training = Generator_Dataset(dataset)
+            else:
+                self.training = Dataset(self.hdf5_train, patch_h, patch_w, n_channels, batch_size=batch_size, thresholds=thresholds, labels=labels, empty=empty)
         else:
             print(f'os.path.isfile(self.hdf5_train) == False')
         

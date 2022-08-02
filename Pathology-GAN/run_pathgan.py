@@ -11,6 +11,8 @@ parser.add_argument('--batch_size', dest='batch_size', type=int, default=64, hel
 parser.add_argument('--model', dest='model', type=str, default='PathologyGAN', help='Model name.')
 parser.add_argument('--checkpoint', dest='checkpoint', required=False, help='Path to pre-trained weights (.ckt) of PathologyGAN.')
 parser.add_argument('--dataset', dest='dataset', type=str, help='Dataset/directory name for he slide h5 dataset')
+parser.add_argument('--generator_dataset', dest='use_generator', type=bool,
+                    default=False, help='Flag for using alternate dataset object')
 args = parser.parse_args()
 epochs = args.epochs
 batch_size = args.batch_size
@@ -27,6 +29,7 @@ image_width = 224
 image_height = 224
 image_channels = 3
 dataset = args.dataset #'tcga' #'vgh_nki'
+use_generator = args.generator_dataset
 marker = 'he'
 name_run = 'h%s_w%s_n%s' % (image_height, image_width, image_channels)
 data_out_path = '%s/%s' % (data_out_path, name_run)
@@ -51,7 +54,7 @@ loss_type = 'relativistic gradient penalty'
 
 # setting labels flag to False if we give 'tcga' as our dataset (because those don't have labels)
 data = Data(dataset=dataset, marker=marker, patch_h=image_height, patch_w=image_width, n_channels=image_channels,
-            batch_size=batch_size, project_path=dbs_path, labels=(dataset == 'vgh_nki'))
+            batch_size=batch_size, project_path=dbs_path, labels=(dataset == 'vgh_nki'), use_generator_dataset=use_generator)
 
 with tf.Graph().as_default():
     pathgan = PathologyGAN(data=data, z_dim=z_dim, layers=layers, use_bn=use_bn, alpha=alpha, beta_1=beta_1,

@@ -3,7 +3,11 @@ import h5py
 
 
 class Dataset:
-    def __init__(self, hdf5_path, patch_h, patch_w, n_channels, batch_size, thresholds=(), labels=True, empty=False):
+    def __init__(self, hdf5_path, patch_h, patch_w, n_channels, batch_size, thresholds=(), labels=True, empty=False,
+                 max_dataset_size=50000):
+    # TODO: remove the label outputs if labels is given as False (I'm not even sure when labels could be used?...)
+    # Dataset with 500,000 samples appears to be too large to load into memory -- adding max_dataset_size to limit
+    # the number of samples loaded in from a dataset
 
         self.i = 0
         self.batch_size = batch_size
@@ -13,13 +17,15 @@ class Dataset:
         self.patch_w = patch_w
         self.n_channels = n_channels
 
+        self.max_dataset_size = max_dataset_size
+
         self.labels_flag = labels
         self.hdf5_path = hdf5_path
         if not empty:
             self.images, self.labels = self.get_hdf5_data()
 
             self.size = len(self.images)
-            self.iterations = len(self.images)//self.batch_size + 1
+            self.iterations = len(self.images) // self.batch_size + 1
         else:
             self.images = list()
             self.labels = list()
@@ -42,17 +48,19 @@ class Dataset:
         naming = list(hdf5_file.keys())
         if 'images' in naming:
             image_name = 'images'
-            labels_name = 'labels'       
+            labels_name = 'labels'
         else:
-            for naming in list(hdf5_file.keys()):     
+            for naming in list(hdf5_file.keys()):
                 if 'img' in naming or 'image' in naming:
                     image_name = naming
                 elif 'labels' in naming:
                     labels_name = naming
 
-        images = hdf5_file[image_name]
+        # placing cap on number of samples for case where max_dataset_size < total dataset size
+        # TODO: add logic to impose this limit in a way that works even when total dataset size < max_dataset_size
+        images = hdf5_file[image_name][:self.max_dataset_size]
         if self.labels_flag:
-            labels = hdf5_file[labels_name]
+            labels = hdf5_file[labels_name][:self.max_dataset_size]
         else:
             labels = list()
         return images, labels
@@ -97,4 +105,17 @@ class Dataset:
             batch_labels = np.concatenate((batch_labels, self.labels[:delta]), axis=0)
             self.i = delta
             self.done = True
-        return batch_img/255.0, batch_labels
+        return batch_img / 255.0, batch_labels
+
+
+# adding a class to iterate through hdf5 file using tensorflow generator objects
+# (the above object is working too slowly for large hdf5 files -- including the vgh example given with repo)
+class Generator_Dataset:
+    def __init__(self, file):
+        self.file = file
+
+    def __call__(self):
+        with h5py.File(self.file, 'r') as hf:
+            # only to be used in case without labels
+            for im in hf['images']:
+                yield im

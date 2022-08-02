@@ -194,7 +194,8 @@ class PathologyGAN(GAN):
                 saver.save(sess=session, save_path=checkpoints)
 
                 # Batch Iteration.
-                for batch_images, batch_labels in tqdm(data.training):
+                # for batch_images, batch_labels in tqdm(data.training):
+                for batch_images in tqdm(data.training):
                     # Inputs.
                     z_batch_1 = np.random.normal(size=(self.batch_size, self.z_dim))
                     z_batch_2 = np.random.normal(size=(self.batch_size, self.z_dim))

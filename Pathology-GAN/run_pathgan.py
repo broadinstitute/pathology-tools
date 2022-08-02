@@ -11,8 +11,8 @@ parser.add_argument('--batch_size', dest='batch_size', type=int, default=64, hel
 parser.add_argument('--model', dest='model', type=str, default='PathologyGAN', help='Model name.')
 parser.add_argument('--checkpoint', dest='checkpoint', required=False, help='Path to pre-trained weights (.ckt) of PathologyGAN.')
 parser.add_argument('--dataset', dest='dataset', type=str, help='Dataset/directory name for he slide h5 dataset')
-parser.add_argument('--generator_dataset', dest='use_generator', type=bool,
-                    default=False, help='Flag for using alternate dataset object')
+# parser.add_argument('--generator_dataset', dest='use_generator', type=bool,
+#                     default=False, help='Flag for using alternate dataset object')
 args = parser.parse_args()
 epochs = args.epochs
 batch_size = args.batch_size
@@ -29,7 +29,7 @@ image_width = 224
 image_height = 224
 image_channels = 3
 dataset = args.dataset #'tcga' #'vgh_nki'
-use_generator = args.generator_dataset
+use_generator = False# args.generator_dataset
 marker = 'he'
 name_run = 'h%s_w%s_n%s' % (image_height, image_width, image_channels)
 data_out_path = '%s/%s' % (data_out_path, name_run)

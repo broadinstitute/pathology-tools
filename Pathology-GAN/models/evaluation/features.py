@@ -167,6 +167,13 @@ def generate_samples_epoch(session, model, data_shape, epoch, evaluation_path, n
 # Generate sampeles from PathologyGAN, no encoder.
 def generate_samples_from_checkpoint(model, data, data_out_path, checkpoint, num_samples=5000, batches=50,
                                      exemplar1=None, exemplar2=None):
+    # Unclear how num_samples and batches are being used here -- looks like num_samples*batches is the total number
+    # of images being generated ...
+
+    # This method has been extended to accomodate either normal image generation or image interpolation given
+    # exemplar latent codes representing example images -- going to construct a flag indicating the mode being used
+    interpolation_mode = exemplar1 is not None and exemplar2 is not None
+
     path = os.path.join(data_out_path, 'evaluation')
     path = os.path.join(path, model.model_name)
     path = os.path.join(path, data.dataset)
@@ -214,7 +221,7 @@ def generate_samples_from_checkpoint(model, data, data_out_path, checkpoint, num
                 # Image and latent generation for StylePathologyGAN.
                 else:
                     # if exemplars are given then we'll generate a batch made up of the different linear combinations of them
-                    if exemplar1 is not None and exemplar2 is not None:
+                    if interpolation_mode:
                         print('Generating image interpolations from exemplars')
                         # build batches-length lists of exemplars to be combined in the generation process
                         # --> If a single exemplar is given for each group, every new latent will be a weighted average
@@ -238,11 +245,12 @@ def generate_samples_from_checkpoint(model, data, data_out_path, checkpoint, num
                              for i in range(batches)])
                     else:
                         z_latent_batch = np.random.normal(size=(batches, model.z_dim))
-                    # ------- saving ordered dict with latent codes for generated images -------
-                    latents_dict = {i: z_latent_batch[i] for i in range(len(z_latent_batch))}
-                    print(f'writing z_latent_batch to pickle at {img_path}')
-                    with open(f'{img_path}/latents_dict_{ind}.pkl', 'wb') as handle:
-                        pickle.dump(latents_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)
+                    # --- saving ordered dict with latent codes for generated images (only needed if interpolating) ---
+                    if interpolation_mode:
+                        latents_dict = {i: z_latent_batch[i] for i in range(len(z_latent_batch))}
+                        print(f'writing z_latent_batch to pickle at {img_path}')
+                        with open(f'{img_path}/latents_dict_{ind}.pkl', 'wb') as handle:
+                            pickle.dump(latents_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)
                     # --------------------------------------------------------------------------
                     feed_dict = {model.z_input_1: z_latent_batch}  # , model.real_images:batch_images}
                     w_latent_batch = session.run([model.w_latent_out], feed_dict=feed_dict)[0]
@@ -258,10 +266,12 @@ def generate_samples_from_checkpoint(model, data, data_out_path, checkpoint, num
                     z_storage[ind] = z_latent_batch[i, :]
                     if 'PathologyGAN' in model.model_name:
                         w_storage[ind] = w_latent_batch[i, :]
-                    # going to add (10*) the alpha value to the image name for easy cross-reference
-                    plt.imsave('%s/gen_%s_alpha_%s.png' % (img_path, ind, int(100 * printable_alphas[ind])),
-                               gen_img_batch[i, :, :, :])
-                    # plt.imsave('%s/gen_%s.png' % (img_path, ind), gen_img_batch[i, :, :, :])
+                    if interpolation_mode:
+                        # going to add (10*) the alpha value to the image name for easy cross-reference
+                        plt.imsave('%s/gen_%s_alpha_%s.png' % (img_path, ind, int(100 * printable_alphas[ind])),
+                                   gen_img_batch[i, :, :, :])
+                    else:
+                        plt.imsave('%s/gen_%s.png' % (img_path, ind), gen_img_batch[i, :, :, :])
                     ind += 1
         print(ind, 'Generated Images')
     else:

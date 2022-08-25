@@ -130,8 +130,8 @@ def construct_hdf5_datasets(output_prefix, train_prop=1.0, img_dim=224, max_data
     # -> Intended to create datasets files in format required by PathologyGAN training procedure
 
     # generate dataset objects that return numpy array images in the format and size required by PathologyGAN
-    train_dataset = BLCA_CL_Dataset('/workdir/crohlice/software/CLAM/TCGA_svs_h5_256/', train_prop=train_prop,
-                                    mode='Train', return_PIL=True, resize_dim=img_dim)
+    train_dataset = BLCA_CL_Dataset('/workdir/crohlice/software/CLAM/TCGA_svs_h5_896/', train_prop=train_prop,
+                                    mode='Train', return_PIL=True, resize_dim=448)
 
     # initialize and populate lists of images
     train_list = []
@@ -162,8 +162,8 @@ if __name__=='__main__':
     # generate_green_patches('slide_green_patch_coords.csv', 16, 'green_patches.npy')
 
     # --- setting the main method to generate hdf5 datasets in format for pathology-gan training ---
-    construct_hdf5_datasets('/workdir/crohlice/scripts/PurityGAN/Pathology-GAN/dataset/tcga/he/patches_h224_w224/hdf5_tcga_he',
-                            train_prop=1.0, max_dataset_size=500000)
+    construct_hdf5_datasets('/workdir/crohlice/scripts/PurityGAN/Pathology-GAN/dataset/tcga/he/patches_h448_w448/TESTLARGE_hdf5_tcga_he',
+                            train_prop=1.0, max_dataset_size=50)
     # ----------------------------------------------------------------------------------------------
     # seed = 1234
     # pl.seed_everything(seed)

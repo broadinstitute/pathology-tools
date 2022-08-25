@@ -32,14 +32,14 @@ class BLCA_CL_Dataset(object):
         files = os.listdir(self.root)
         h5s = [x for x in files if '.h5' in x] #<- whole-slide images
         # print(f'h5s = {h5s}')
-        # patient labels from the .h5 files -- given by the first three substrings in the filename
-        h5s_pat = sorted(list(set(['-'.join(x.split('-')[:3]) for x in h5s])))
         # *OPTIONAL* Shuffling the list of patients before splitting on patient -- contents of the two splits
         # determined by the seed and the split proportion
         random.seed(4)
         if shuffle:
-            random.shuffle(h5s_pat)
-        #print(h5s_pat)
+            random.shuffle(h5s)
+        # print(h5s_pat)
+        # patient labels from the .h5 files -- given by the first three substrings in the filename
+        h5s_pat = sorted(list(set(['-'.join(x.split('-')[:3]) for x in h5s])))
 
         # make the train/val split at the patient level (necessary in the general case of having \geq 1 samples per patient)
         if mode == 'Train':
@@ -132,7 +132,7 @@ def construct_hdf5_datasets(input_patches_dir, output_prefix, train_prop=1.0, im
 
     # generate dataset objects that return numpy array images in the format and size required by PathologyGAN
     train_dataset = BLCA_CL_Dataset(input_patches_dir, train_prop=train_prop,
-                                    mode='Train', return_PIL=True, resize_dim=448)
+                                    mode='Train', return_PIL=True, resize_dim=img_dim)
 
     # initialize and populate lists of images
     train_list = []
@@ -166,6 +166,7 @@ if __name__=='__main__':
     parser.add_argument('--output_prefix', type=str, help='Output prefix for training .h5 dataset file')
     parser.add_argument('--train_proportion', type=float, default=1.0, help='Proportion of data to use for training set '
                                                                           'in rain/test split')
+    parser.add_argument('--img_dim', type=int, default=448, help='Dimension (side-length) for output images')
     parser.add_argument('--max_dataset_size', type=int, help='Maximum number of samples to include in .h5 dataset')
     args = parser.parse_args()
     # --- generating patches identified as green by looking for patches with avg green value > 200 ---
@@ -176,7 +177,7 @@ if __name__=='__main__':
     #                         train_prop=1.0, max_dataset_size=50)
     # ----- shifting to use of CLI arguments -------
     construct_hdf5_datasets(input_patches_dir=args.input_patches_dir, output_prefix=args.output_prefix, train_prop=args.train_proportion,
-                            max_dataset_size=args.max_dataset_size)
+                            img_dim=args.img_dim, max_dataset_size=args.max_dataset_size)
     # ----------------------------------------------------------------------------------------------
     # seed = 1234
     # pl.seed_everything(seed)

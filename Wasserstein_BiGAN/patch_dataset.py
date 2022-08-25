@@ -131,7 +131,7 @@ def construct_hdf5_datasets(output_prefix, train_prop=1.0, img_dim=224, max_data
     # -> Intended to create datasets files in format required by PathologyGAN training procedure
 
     # generate dataset objects that return numpy array images in the format and size required by PathologyGAN
-    train_dataset = BLCA_CL_Dataset('/workdir/crohlice/software/CLAM/TCGA_svs_h5_896/', train_prop=train_prop,
+    train_dataset = BLCA_CL_Dataset('/workdir/crohlice/software/CLAM/TCGA_svs_h5_896/patches/', train_prop=train_prop,
                                     mode='Train', return_PIL=True, resize_dim=448)
 
     # initialize and populate lists of images

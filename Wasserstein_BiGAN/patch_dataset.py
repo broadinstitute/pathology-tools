@@ -31,7 +31,7 @@ class BLCA_CL_Dataset(object):
 
         files = os.listdir(self.root)
         h5s = [x for x in files if '.h5' in x] #<- whole-slide images
-        # print(f'h5s = {h5s}')
+        print(f'h5s = {h5s}')
         # *OPTIONAL* Shuffling the list of patients before splitting on patient -- contents of the two splits
         # determined by the seed and the split proportion
         random.seed(4)
@@ -126,13 +126,14 @@ def generate_green_patches(patch_csv, output_dim, output_file):
     with open(output_file, 'wb') as g:
         np.save(g, np.array(patch_list))
 
-def construct_hdf5_datasets(input_patches_dir, output_prefix, train_prop=1.0, img_dim=224, max_dataset_size=None):
+def construct_hdf5_datasets(input_patches_dir, output_prefix, train_prop=1.0, img_dim=224, max_dataset_size=None,
+                            shuffle=False):
     # function to create hdf5 files containing training and testing image datasets
     # -> Intended to create datasets files in format required by PathologyGAN training procedure
 
     # generate dataset objects that return numpy array images in the format and size required by PathologyGAN
     train_dataset = BLCA_CL_Dataset(input_patches_dir, train_prop=train_prop,
-                                    mode='Train', return_PIL=True, resize_dim=img_dim)
+                                    mode='Train', return_PIL=True, resize_dim=img_dim, shuffle=shuffle)
 
     # initialize and populate lists of images
     train_list = []
@@ -168,6 +169,8 @@ if __name__=='__main__':
                                                                           'in rain/test split')
     parser.add_argument('--img_dim', type=int, default=448, help='Dimension (side-length) for output images')
     parser.add_argument('--max_dataset_size', type=int, help='Maximum number of samples to include in .h5 dataset')
+    parser.add_argument('--shuffle', type=bool, default=False, help='Boolean indicating whether or not to shuffle the '
+                                                                    'hdf5 files being used to build the dataset')
     args = parser.parse_args()
     # --- generating patches identified as green by looking for patches with avg green value > 200 ---
     # generate_green_patches('slide_green_patch_coords.csv', 16, 'green_patches.npy')
@@ -177,7 +180,7 @@ if __name__=='__main__':
     #                         train_prop=1.0, max_dataset_size=50)
     # ----- shifting to use of CLI arguments -------
     construct_hdf5_datasets(input_patches_dir=args.input_patches_dir, output_prefix=args.output_prefix, train_prop=args.train_proportion,
-                            img_dim=args.img_dim, max_dataset_size=args.max_dataset_size)
+                            img_dim=args.img_dim, max_dataset_size=args.max_dataset_size, shuffle=args.shuffle)
     # ----------------------------------------------------------------------------------------------
     # seed = 1234
     # pl.seed_everything(seed)

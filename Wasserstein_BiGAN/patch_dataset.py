@@ -126,12 +126,12 @@ def generate_green_patches(patch_csv, output_dim, output_file):
     with open(output_file, 'wb') as g:
         np.save(g, np.array(patch_list))
 
-def construct_hdf5_datasets(output_prefix, train_prop=1.0, img_dim=224, max_dataset_size=None):
+def construct_hdf5_datasets(input_patches_dir, output_prefix, train_prop=1.0, img_dim=224, max_dataset_size=None):
     # function to create hdf5 files containing training and testing image datasets
     # -> Intended to create datasets files in format required by PathologyGAN training procedure
 
     # generate dataset objects that return numpy array images in the format and size required by PathologyGAN
-    train_dataset = BLCA_CL_Dataset('/workdir/crohlice/software/CLAM/TCGA_svs_h5_896/patches/', train_prop=train_prop,
+    train_dataset = BLCA_CL_Dataset(input_patches_dir, train_prop=train_prop,
                                     mode='Train', return_PIL=True, resize_dim=448)
 
     # initialize and populate lists of images
@@ -161,6 +161,8 @@ def construct_hdf5_datasets(output_prefix, train_prop=1.0, img_dim=224, max_data
 if __name__=='__main__':
     parser = argparse.ArgumentParser(description='Histology patch dataset generator - currently tailored to be used'
                                                  'for generating .h5 dataset files for use by PathologyGAN')
+    parser.add_argument('--input_patches_dir', type=str, help='Directory containing CLAM-generated patch files (h5s and'
+                                                              'svs files')
     parser.add_argument('--output_prefix', type=str, help='Output prefix for training .h5 dataset file')
     parser.add_argument('--train_proportion', type=float, default=1.0, help='Proportion of data to use for training set '
                                                                           'in rain/test split')
@@ -173,7 +175,7 @@ if __name__=='__main__':
     # construct_hdf5_datasets('/workdir/crohlice/scripts/PurityGAN/Pathology-GAN/dataset/tcga/he/patches_h448_w448/TESTLARGE_hdf5_tcga_he',
     #                         train_prop=1.0, max_dataset_size=50)
     # ----- shifting to use of CLI arguments -------
-    construct_hdf5_datasets(output_prefix=args.output_prefix, train_prop=args.train_proportion,
+    construct_hdf5_datasets(input_patches_dir=args.input_patches_dir, output_prefix=args.output_prefix, train_prop=args.train_proportion,
                             max_dataset_size=args.max_dataset_size)
     # ----------------------------------------------------------------------------------------------
     # seed = 1234

@@ -1,4 +1,3 @@
-# Modified version of Matt's dataset/dataloader script
 import os
 import torch
 import torch.nn as nn
@@ -16,6 +15,7 @@ import h5py
 from tqdm import tqdm
 import random
 import openslide
+import argparse
 
 class BLCA_CL_Dataset(object):
     def __init__(self, path, mode='Train', train_prop=0.8, transform=None, return_PIL=False, resize_dim=None,
@@ -31,7 +31,7 @@ class BLCA_CL_Dataset(object):
 
         files = os.listdir(self.root)
         h5s = [x for x in files if '.h5' in x] #<- whole-slide images
-        print(f'h5s = {h5s}')
+        # print(f'h5s = {h5s}')
         # patient labels from the .h5 files -- given by the first three substrings in the filename
         h5s_pat = sorted(list(set(['-'.join(x.split('-')[:3]) for x in h5s])))
         # *OPTIONAL* Shuffling the list of patients before splitting on patient -- contents of the two splits
@@ -159,12 +159,21 @@ def construct_hdf5_datasets(output_prefix, train_prop=1.0, img_dim=224, max_data
     #     f.close()
 
 if __name__=='__main__':
+    parser = argparse.ArgumentParser(description='Histology patch dataset generator - currently tailored to be used'
+                                                 'for generating .h5 dataset files for use by PathologyGAN')
+    parser.add_argument('--out_path')
+    parser.add_argument('--train_proportion', type=float, default=1.0, help='Proportion of data to use for training set '
+                                                                          'in rain/test split')
+    parser.add_argument('--max_dataset_size', type=int, help='Maximum number of samples to include in .h5 dataset')
+    args = parser.parse_args()
     # --- generating patches identified as green by looking for patches with avg green value > 200 ---
     # generate_green_patches('slide_green_patch_coords.csv', 16, 'green_patches.npy')
 
     # --- setting the main method to generate hdf5 datasets in format for pathology-gan training ---
-    construct_hdf5_datasets('/workdir/crohlice/scripts/PurityGAN/Pathology-GAN/dataset/tcga/he/patches_h448_w448/TESTLARGE_hdf5_tcga_he',
-                            train_prop=1.0, max_dataset_size=50)
+    # construct_hdf5_datasets('/workdir/crohlice/scripts/PurityGAN/Pathology-GAN/dataset/tcga/he/patches_h448_w448/TESTLARGE_hdf5_tcga_he',
+    #                         train_prop=1.0, max_dataset_size=50)
+    # ----- shifting to use of CLI arguments -------
+    construct_hdf5_datasets(args.out_path, args.train_proportion, args.max_dataset_size)
     # ----------------------------------------------------------------------------------------------
     # seed = 1234
     # pl.seed_everything(seed)

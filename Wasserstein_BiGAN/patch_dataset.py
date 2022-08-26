@@ -31,13 +31,12 @@ class BLCA_CL_Dataset(object):
 
         files = os.listdir(self.root)
         h5s = [x for x in files if '.h5' in x] #<- whole-slide images
-        print(f'h5s = {h5s}')
         # *OPTIONAL* Shuffling the list of patients before splitting on patient -- contents of the two splits
         # determined by the seed and the split proportion
         random.seed(4)
         if shuffle:
             random.shuffle(h5s)
-        # print(h5s_pat)
+        print(f'h5s = {h5s}')
         # patient labels from the .h5 files -- given by the first three substrings in the filename
         h5s_pat = sorted(list(set(['-'.join(x.split('-')[:3]) for x in h5s])))
 

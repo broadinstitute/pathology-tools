@@ -128,16 +128,20 @@ class BLCA_CL_Dataset(object):
         green_marker = np.where(deconv_result.Stains[:, :, 1] > 150, 0, 1)
         tissue = np.where(deconv_result.Stains[:, :, 0] > 200, 0, 1)
         contours, hierarchy = cv2.findContours(green_marker.astype("uint8"), cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
-        max_contour = max([cv2.contourArea(c) for c in contours])
+        # handling case when contours is empty
+        try:
+            max_contour = max([cv2.contourArea(c) for c in contours])
+        except:
+            max_contour = 0
 
         print(f'max_contour = {max_contour};\tnp.sum(tissue) = {np.sum(tissue)}')
 
         if max_contour > 10000 or np.sum(tissue) < (img_size * img_size * 0.1):
             # green
-            return np.array(img), True
+            return img, True
         else:
             # not green
-            return np.array(img), False
+            return img, False
 
     def __len__(self):
         # Length of dataset given by number of overall number of patches across all slides
@@ -177,7 +181,7 @@ def construct_hdf5_datasets(input_patches_dir, output_prefix, train_prop=1.0, im
         i = 0
         while len(train_list) < trainset_size:
             img, green = train_dataset.__getitem__(i)
-            print(f'Image #{i} from dataset is {"not" if green else ""} green')
+            print(f'Image #{i} from dataset is{"" if green else " not"} green')
             if green:
                 train_list_green.append(img)
             else:
@@ -192,7 +196,7 @@ def construct_hdf5_datasets(input_patches_dir, output_prefix, train_prop=1.0, im
 
     # ... and optionally the green dataset
     with h5py.File(output_prefix + '_train_GREEN.h5', 'w') as f:
-        f.create_dataset('images', data=np.array(train_list), compression='gzip')
+        f.create_dataset('images', data=np.array(train_list_green), compression='gzip')
         f.close()
 
 

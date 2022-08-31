@@ -122,7 +122,7 @@ class BLCA_CL_Dataset(object):
         # ---> be accumulated for green and non-green images
         stains = list(stain_color_map.keys())
         w_est = np.array([stain_color_map[st] for st in stains]).T
-        img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        # img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         # color deconv
         deconv_result = htk.preprocessing.color_deconvolution.color_deconvolution(img_rgb, w_est, 255)
         # ----- tighten this up -----

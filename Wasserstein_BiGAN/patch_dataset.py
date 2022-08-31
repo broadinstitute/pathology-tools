@@ -122,23 +122,15 @@ class BLCA_CL_Dataset(object):
         # ---> be accumulated for green and non-green images
         stains = list(stain_color_map.keys())
         w_est = np.array([stain_color_map[st] for st in stains]).T
-        # img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         # color deconv
-        deconv_result = htk.preprocessing.color_deconvolution.color_deconvolution(img, w_est, 255)
-        # ----- tighten this up -----
-        green_marker = deconv_result.Stains[:, :, 1]
-        tissue = deconv_result.Stains[:, :, 0]
-        green_marker[green_marker > 150] = 0
-        green_marker[green_marker > 0] = 1
-        tissue[tissue > 200] = 0
-        tissue[tissue > 0] = 1
-        # ---------------------------
+        deconv_result = htk.preprocessing.color_deconvolution.color_deconvolution(img_rgb, w_est, 255)
+        green_marker = np.where(deconv_result.Stains[:, :, 1] > 150, 0, 1)
+        tissue = np.where(deconv_result.Stains[:, :, 0] > 200, 0, 1)
         contours, hierarchy = cv2.findContours(green_marker.astype("uint8"), cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
-        max_contour = 0
-        for contour in contours:
-            contour_size = cv2.contourArea(contour)
-            if contour_size > max_contour:
-                max_contour = contour_size
+        max_contour = max([cv2.contourArea(c) for c in contours])
+
+        print(f'max_contour = {max_contour};\tnp.sum(tissue) = {np.sum(tissue)}')
 
         if max_contour > 10000 or np.sum(tissue) < (img_size * img_size * 0.1):
             # green

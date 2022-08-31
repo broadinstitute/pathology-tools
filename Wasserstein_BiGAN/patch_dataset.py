@@ -124,7 +124,7 @@ class BLCA_CL_Dataset(object):
         w_est = np.array([stain_color_map[st] for st in stains]).T
         # img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         # color deconv
-        deconv_result = htk.preprocessing.color_deconvolution.color_deconvolution(img_rgb, w_est, 255)
+        deconv_result = htk.preprocessing.color_deconvolution.color_deconvolution(img, w_est, 255)
         # ----- tighten this up -----
         green_marker = deconv_result.Stains[:, :, 1]
         tissue = deconv_result.Stains[:, :, 0]

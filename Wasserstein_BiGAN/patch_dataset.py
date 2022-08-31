@@ -19,6 +19,7 @@ import histomicstk as htk
 import cv2
 import argparse
 
+
 class BLCA_CL_Dataset(object):
     def __init__(self, path, mode='Train', train_prop=0.8, transform=None, return_PIL=False, resize_dim=None,
                  shuffle=False, stain_color_map=None):
@@ -34,9 +35,10 @@ class BLCA_CL_Dataset(object):
         self.stain_color_map = stain_color_map
         # boolean flag for whether or not call into green filtering method
         self.identify_green = self.stain_color_map is not None
+        print(f'Dataset attribute self.identify_green = {self.identify_green}')
 
         files = os.listdir(self.root)
-        h5s = [x for x in files if '.h5' in x] #<- whole-slide images
+        h5s = [x for x in files if '.h5' in x]  # <- whole-slide images
         # *OPTIONAL* Shuffling the list of patients before splitting on patient -- contents of the two splits
         # determined by the seed and the split proportion
         random.seed(4)
@@ -48,9 +50,9 @@ class BLCA_CL_Dataset(object):
 
         # make the train/val split at the patient level (necessary in the general case of having \geq 1 samples per patient)
         if mode == 'Train':
-            h5s_pat = h5s_pat[:int(train_prop*len(h5s_pat))]
-        else: #<-- assuming only two splits, just train and val
-            h5s_pat = h5s_pat[int(train_prop*len(h5s_pat)):]
+            h5s_pat = h5s_pat[:int(train_prop * len(h5s_pat))]
+        else:  # <-- assuming only two splits, just train and val
+            h5s_pat = h5s_pat[int(train_prop * len(h5s_pat)):]
 
         # Select the WSIs for which the patient label is found in the set of approved patient labels (h5s_pat)
         # final_list = [ele for ele in h5s if any([pref in ele for pref in h5s_pat])]
@@ -61,9 +63,9 @@ class BLCA_CL_Dataset(object):
 
         # for j in tqdm(final_list):
         for j in final_list:
-            with h5py.File(self.root+j, "r") as f:
+            with h5py.File(self.root + j, "r") as f:
                 # List all groups
-                #print("Keys: %s" % f.keys())
+                # print("Keys: %s" % f.keys())
                 a_group_key = list(f.keys())[0]
 
                 patch_level = f['coords'].attrs['patch_level']
@@ -76,29 +78,30 @@ class BLCA_CL_Dataset(object):
                     self.coords_all.append([j, k, patch_level, patch_size])
 
     def __getitem__(self, idx):
-            transform = self.data_transformation
-            current_patch = self.coords_all[idx]
-            slide = openslide.OpenSlide(self.root+current_patch[0][:-3]+'.svs')
-            img = slide.read_region(tuple(current_patch[1]), current_patch[2], tuple([current_patch[3], current_patch[3]])).convert('RGB')
-            # if we want images in the format required by PathologyGAN, we just cast the PIL RGB images to numpy arrays
-            if self.return_PIL_format:
-                if self.resize_dim is not None:
-                    # PIL.Image has resize functions, ANTIALIAS is supposed to be best for scaling down
-                    img = img.resize((self.resize_dim, self.resize_dim), Image.ANTIALIAS)
-                    img = np.array(img)
-                if self.identify_green:
-                    # if we want to separate patches with marker, pass the PIL image to filter_green which returns
-                    # the numpy array and a bool flag indicating whether the image has marker
-                    return self.filter_green(img, self.stain_color_map, img_size=self.resize_dim)
-                else:
-                    return img
-
-            # if the dataset is instantiated with a transform function then we'll use it, otherwise we create on just consisting of ToTensor
-            if not transform:
-                transform = transforms.Compose([transforms.ToTensor()])
-                return transform(img)
+        transform = self.data_transformation
+        current_patch = self.coords_all[idx]
+        slide = openslide.OpenSlide(self.root + current_patch[0][:-3] + '.svs')
+        img = slide.read_region(tuple(current_patch[1]), current_patch[2],
+                                tuple([current_patch[3], current_patch[3]])).convert('RGB')
+        # if we want images in the format required by PathologyGAN, we just cast the PIL RGB images to numpy arrays
+        if self.return_PIL_format:
+            if self.resize_dim is not None:
+                # PIL.Image has resize functions, ANTIALIAS is supposed to be best for scaling down
+                img = img.resize((self.resize_dim, self.resize_dim), Image.ANTIALIAS)
+                img = np.array(img)
+            if self.identify_green:
+                # if we want to separate patches with marker, pass the PIL image to filter_green which returns
+                # the numpy array and a bool flag indicating whether the image has marker
+                return self.filter_green(img, self.stain_color_map, img_size=self.resize_dim)
             else:
-                return transform(img)
+                return img
+
+        # if the dataset is instantiated with a transform function then we'll use it, otherwise we create on just consisting of ToTensor
+        if not transform:
+            transform = transforms.Compose([transforms.ToTensor()])
+            return transform(img)
+        else:
+            return transform(img)
 
     def get_specific_item(self, slide_path, x, y, resize_dim):
         # helper method to generate patch images from slide/coord inputs -- being used to check the patches
@@ -137,7 +140,7 @@ class BLCA_CL_Dataset(object):
             if contour_size > max_contour:
                 max_contour = contour_size
 
-        if max_contour > 10000 or np.sum(tissue) < (img_size*img_size*0.1):
+        if max_contour > 10000 or np.sum(tissue) < (img_size * img_size * 0.1):
             # green
             return np.array(img), True
         else:
@@ -154,6 +157,7 @@ def construct_hdf5_datasets(input_patches_dir, output_prefix, train_prop=1.0, im
     # function to create hdf5 files containing training and testing image datasets
     # -> Intended to create datasets files in format required by PathologyGAN training procedure
     filter_green = stain_color_map is not None
+    print(f'construct_hdf5_dataset() called with filter_green={filter_green}')
 
     # generate dataset objects that return numpy array images in the format and size required by PathologyGAN
     train_dataset = BLCA_CL_Dataset(input_patches_dir, train_prop=train_prop,
@@ -181,6 +185,7 @@ def construct_hdf5_datasets(input_patches_dir, output_prefix, train_prop=1.0, im
         i = 0
         while len(train_list) < trainset_size:
             img, green = train_dataset.__getitem__(i)
+            print(f'Image #{i} from dataset is {"not" if green else ""} green')
             if green:
                 train_list_green.append(img)
             else:
@@ -188,18 +193,18 @@ def construct_hdf5_datasets(input_patches_dir, output_prefix, train_prop=1.0, im
             i += 1
 
     # save datasets to hdf5
-    with h5py.File(output_prefix+'_train.h5', 'w') as f:
+    with h5py.File(output_prefix + '_train.h5', 'w') as f:
         # train_dset = f.create_dataset('images', data=np.array(train_list))
         f.create_dataset('images', data=np.array(train_list), compression='gzip')
         f.close()
 
     # ... and optionally the green dataset
-    with h5py.File(output_prefix+'_train_GREEN.h5', 'w') as f:
+    with h5py.File(output_prefix + '_train_GREEN.h5', 'w') as f:
         f.create_dataset('images', data=np.array(train_list), compression='gzip')
         f.close()
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Histology patch dataset generator - currently tailored to be used'
                                                  'for generating .h5 dataset files for use by PathologyGAN')
     parser.add_argument('--input_patches_dir', type=str, help='Directory containing CLAM-generated patch files (h5s and'
@@ -216,11 +221,11 @@ if __name__=='__main__':
     # defining the stain color map used in the green filtering step
     green_filter_cmap = {'tissue': [0.24334306, 0.79350096, 0.55779959],
                          'green_marker': [0.90135287, 0.26190666, 0.34491723],
-                         'other': [ 0.16255852, 0.5335877, -0.82997523]}
+                         'other': [0.16255852, 0.5335877, -0.82997523]}
 
     # --- setting the main method to generate hdf5 datasets in format for pathology-gan training ---
     # example output prefix: '/workdir/crohlice/scripts/PurityGAN/Pathology-GAN/dataset/tcga/he/patches_h448_w448/TESTLARGE_hdf5_tcga_he',
-    construct_hdf5_datasets(input_patches_dir=args.input_patches_dir, output_prefix=args.output_prefix, train_prop=args.train_proportion,
+    construct_hdf5_datasets(input_patches_dir=args.input_patches_dir, output_prefix=args.output_prefix,
+                            train_prop=args.train_proportion,
                             img_dim=args.img_dim, max_dataset_size=args.max_dataset_size, shuffle=args.shuffle,
                             stain_color_map=green_filter_cmap)
-

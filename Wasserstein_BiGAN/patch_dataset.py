@@ -185,6 +185,7 @@ def construct_hdf5_datasets(input_patches_dir, output_prefix, train_prop=1.0, im
                 train_list_green.append(img)
             else:
                 train_list.append(img)
+            i += 1
 
     # save datasets to hdf5
     with h5py.File(output_prefix+'_train.h5', 'w') as f:

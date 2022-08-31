@@ -85,12 +85,13 @@ class BLCA_CL_Dataset(object):
                 if self.resize_dim is not None:
                     # PIL.Image has resize functions, ANTIALIAS is supposed to be best for scaling down
                     img = img.resize((self.resize_dim, self.resize_dim), Image.ANTIALIAS)
+                    img = np.array(img)
                 if self.identify_green:
                     # if we want to separate patches with marker, pass the PIL image to filter_green which returns
                     # the numpy array and a bool flag indicating whether the image has marker
                     return self.filter_green(img, self.stain_color_map, img_size=self.resize_dim)
                 else:
-                    return np.array(img)
+                    return img
 
             # if the dataset is instantiated with a transform function then we'll use it, otherwise we create on just consisting of ToTensor
             if not transform:

@@ -132,7 +132,7 @@ class BLCA_CL_Dataset(object):
         cas = [cv2.contourArea(c) for c in contours]
         max_contour = 0 if len(cas) == 0 else max(cas)
 
-        print(f'max_contour = {max_contour};\tnp.sum(tissue) = {np.sum(tissue)}')
+        # print(f'max_contour = {max_contour};\tnp.sum(tissue) = {np.sum(tissue)}')
 
         if max_contour > 10000 or np.sum(tissue) < (img_size * img_size * 0.1):
             # green
@@ -179,7 +179,7 @@ def construct_hdf5_datasets(input_patches_dir, output_prefix, train_prop=1.0, im
         i = 0
         while len(train_list) < trainset_size:
             img, green = train_dataset.__getitem__(i)
-            print(f'Image #{i} from dataset is{"" if green else " not"} green')
+            # print(f'Image #{i} from dataset is{"" if green else " not"} green')
             if green:
                 train_list_green.append(img)
             else:

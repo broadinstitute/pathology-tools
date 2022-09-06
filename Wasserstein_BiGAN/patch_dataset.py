@@ -177,7 +177,8 @@ def construct_hdf5_datasets(input_patches_dir, output_prefix, train_prop=1.0, im
             train_list.append(train_dataset.__getitem__(i))
     else:
         i = 0
-        while len(train_list) < trainset_size:
+        # if our train_list isn't full (WRT specified target size) and there are still elements remaining in dataset obj
+        while len(train_list) < trainset_size and i < len(train_dataset):
             img, green = train_dataset.__getitem__(i)
             # print(f'Image #{i} from dataset is{"" if green else " not"} green')
             if green:

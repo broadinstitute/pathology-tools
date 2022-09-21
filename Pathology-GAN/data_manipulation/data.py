@@ -4,7 +4,7 @@ from data_manipulation.dataset import Dataset, Generator_Dataset
 
 class Data:
     def __init__(self, dataset, marker, patch_h, patch_w, n_channels, batch_size, project_path=os.getcwd(),
-                 thresholds=(), labels=True, empty=False, use_generator_dataset=False):
+                 thresholds=(), labels=False, empty=False, use_generator_dataset=False):
         # Adding the `use_generator_dataset` flag to trigger the alternate dataset class that uses a tensorflow
         # generator object to more efficiently open/traverse the hdf5 dataset file
 

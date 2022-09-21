@@ -164,7 +164,7 @@ def generate_samples_epoch(session, model, data_shape, epoch, evaluation_path, n
                 ind += 1
 
 
-# Generate sampeles from PathologyGAN, no encoder.
+# Generate samples from PathologyGAN, no encoder.
 def generate_samples_from_checkpoint(model, data, data_out_path, checkpoint, num_samples=5000, batches=50,
                                      exemplar1=None, exemplar2=None):
     # Unclear how num_samples and batches are being used here -- looks like num_samples*batches is the total number

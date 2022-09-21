@@ -3,7 +3,7 @@ import h5py
 
 
 class Dataset:
-    def __init__(self, hdf5_path, patch_h, patch_w, n_channels, batch_size, thresholds=(), labels=True, empty=False,
+    def __init__(self, hdf5_path, patch_h, patch_w, n_channels, batch_size, thresholds=(), labels=False, empty=False,
                  max_dataset_size=50000):
     # TODO: remove the label outputs if labels is given as False (I'm not even sure when labels could be used?...)
     # Dataset with 500,000 samples appears to be too large to load into memory -- adding max_dataset_size to limit

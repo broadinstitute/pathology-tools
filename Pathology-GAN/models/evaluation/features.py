@@ -166,11 +166,11 @@ def generate_samples_epoch(session, model, data_shape, epoch, evaluation_path, n
 
 # Generate samples from PathologyGAN, no encoder.
 def generate_samples_from_checkpoint(model, data, data_out_path, checkpoint, num_samples=5000, batches=50,
-                                     exemplar1=None, exemplar2=None):
+                                     exemplar1=None, exemplar2=None, store_latents=True):
     # Unclear how num_samples and batches are being used here -- looks like num_samples*batches is the total number
     # of images being generated ...
 
-    # This method has been extended to accomodate either normal image generation or image interpolation given
+    # This method has been extended to accommodate either normal image generation or image interpolation given
     # exemplar latent codes representing example images -- going to construct a flag indicating the mode being used
     interpolation_mode = exemplar1 is not None and exemplar2 is not None
 
@@ -246,7 +246,7 @@ def generate_samples_from_checkpoint(model, data, data_out_path, checkpoint, num
                     else:
                         z_latent_batch = np.random.normal(size=(batches, model.z_dim))
                     # --- saving ordered dict with latent codes for generated images (only needed if interpolating) ---
-                    if interpolation_mode:
+                    if interpolation_mode or store_latents:
                         latents_dict = {i: z_latent_batch[i] for i in range(len(z_latent_batch))}
                         print(f'writing z_latent_batch to pickle at {img_path}')
                         with open(f'{img_path}/latents_dict_{ind}.pkl', 'wb') as handle:

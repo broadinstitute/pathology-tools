@@ -1,4 +1,4 @@
-from tensorflow.contrib.tensorboard.plugins import projector
+# from tensorflow.contrib.tensorboard.plugins import projector
 from models.generative.utils import *
 
 

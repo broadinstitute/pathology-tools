@@ -138,14 +138,16 @@ def convolutional(inputs, output_channels, filter_size, stride, padding, conv_ty
         # Shapes.
         current_shape = inputs.get_shape()
         input_channels = current_shape[3]
-        if 'transpose'in conv_type or 'upscale' in conv_type: filter_shape = (filter_size, filter_size, output_channels, input_channels)   
-        else: filter_shape = (filter_size, filter_size, input_channels, output_channels)    
+        if 'transpose' in conv_type or 'upscale' in conv_type:
+            filter_shape = (filter_size, filter_size, output_channels, input_channels)
+        else:
+            filter_shape = (filter_size, filter_size, input_channels, output_channels)
 
         # Weight and Bias Initialization.
         bias = tf.get_variable(name='bias', shape=[output_channels], initializer=tf.constant_initializer(0.0), trainable=True, dtype=tf.float32) 
         filter = tf.get_variable(name='filter_conv', shape=filter_shape, initializer=weight_init, trainable=True, dtype=tf.float32, regularizer=regularizer)    
         
-       # Type of convolutional operation.
+        # Type of convolutional operation.
         if conv_type == 'upscale':
             output_shape = [tf.shape(inputs)[0], current_shape[1]*2, current_shape[2]*2, output_channels]
             # Weight filter initializer.

@@ -90,7 +90,7 @@ with tf.Graph().as_default():
     gen_hdf5_path = generate_samples_from_checkpoint(model=pathgan, data=data, data_out_path=main_path, checkpoint=checkpoint, num_samples=num_samples, batches=num_samples, exemplar1=exemplar1_latent, exemplar2=exemplar2_latent)
 
 # Generate Inception features from fake images.
-with tf.Graph().as_default():
-    hdf5s_features = inception_tf_feature_activations(hdf5s=[gen_hdf5_path],
-                                                      input_shape=[data.patch_h, data.patch_w, data.n_channels],
-                                                      batch_size=num_samples)
+# with tf.Graph().as_default():
+#     hdf5s_features = inception_tf_feature_activations(hdf5s=[gen_hdf5_path],
+#                                                       input_shape=[data.patch_h, data.patch_w, data.n_channels],
+#                                                       batch_size=num_samples)

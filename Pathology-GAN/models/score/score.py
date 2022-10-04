@@ -1,5 +1,5 @@
 import tensorflow as tf
-import tensorflow.contrib.gan as tfgan
+import tensorflow.contrib.gan as tfgan #<-- not in tensorflow 1.15.5
 from data_manipulation.utils import *
 from models.score.utils import *
 from models.score.frechet_inception_distance import *

@@ -128,6 +128,7 @@ def setup_csvs(csvs, model, losses):
         writer = csv.writer(csv_file)
         writer.writerow(header)
 
+
 # Setup output folder.
 def setup_output(show_epochs, epochs, data, n_images, z_dim, data_out_path, model_name, restore, save_img):
     os.umask(0o002)
@@ -154,7 +155,6 @@ def setup_output(show_epochs, epochs, data, n_images, z_dim, data_out_path, mode
         if os.path.isdir(checkpoints_path):
             shutil.rmtree(checkpoints_path)
         os.makedirs(checkpoints_path)
-    
 
     image_height = data.training.patch_h
     image_width = data.training.patch_w

@@ -49,7 +49,7 @@ parser.add_argument('--save_FID_datasets', type=bool, default=True, help='Bool f
 args = parser.parse_args()
 
 # checking file types and ensuring valid path
-assert args.synth_dataset[:-3] == '.h5' and args.training_dataset[:-3] == '.h5', 'Datasets must be .h5 files'
+assert args.synth_dataset[-3:] == '.h5' and args.training_dataset[-3:] == '.h5', 'Datasets must be .h5 files'
 if args.pickle_output_dir[-1] != '/':
     args.pickle_output_dir += '/'
 

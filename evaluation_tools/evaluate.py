@@ -50,7 +50,7 @@ parser.add_argument('--synth_dataset', help='Path to synthetic (PathologyGAN out
 parser.add_argument('--training_dataset', help='Path to training dataset used for PathologyGAN')
 parser.add_argument('--n_samples_FID', type=int, default=5000, help='Number of samples considered in FID calculation')
 parser.add_argument('--pickle_output_dir', default=None, help='Output directory for dataset pickles to be written')
-parser.add_argument('--save_FID_datasets', action='store_false', help='Bool flag to trigger saving of FID datasets')
+parser.add_argument('--save_FID_datasets', action='store_true', help='Bool flag to trigger saving of FID datasets')
 args = parser.parse_args()
 
 # checking file types and ensuring valid path

@@ -21,10 +21,10 @@ def FID_dataset_prep(synth_dataset, training_dataset, n_samples, output_dir=None
     print(f'training_arr.shape = {training_arr.shape}')
     if n_samples < len(synth_arr):
         synth_inds = [np.random.choice(len(synth_arr), n_samples, replace=False)]
-        synth_arr = synth_arr[synth_inds]
+        synth_arr = np.squeeze(synth_arr[synth_inds])  # <- this appears to introduce an extra dimension of size 1...
     if n_samples < len(training_arr):
         training_inds = [np.random.choice(len(training_arr), n_samples, replace=False)]
-        training_arr = training_arr[training_inds]
+        training_arr = np.squeeze(training_arr[training_inds])
 
     print(f'synth_arr.shape = {synth_arr.shape}')
     print(f'training_arr.shape = {training_arr.shape}')

@@ -4,8 +4,6 @@ import numpy as np
 import pickle
 from FID.fid import get_fid
 from IS.inception_score import get_inception_score
-import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 
 def dataset_prep(synth_dataset, n_samples, training_dataset=None, output_dir=None, save_datasets=True, metric=None):

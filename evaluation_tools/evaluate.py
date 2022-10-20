@@ -17,12 +17,17 @@ def FID_dataset_prep(synth_dataset, training_dataset, n_samples, output_dir=None
     # select min(n_samples, len(dataset)) random draws from the datasets
     # TODO: Question -- does the FID calculation require the same numbers of each
     #  dataset to be given? Intuitively that shouldn't be necessary but not sure about the implementation
+    print(f'synth_arr.shape = {synth_arr.shape}')
+    print(f'training_arr.shape = {training_arr.shape}')
     if n_samples < len(synth_arr):
         synth_inds = [np.random.choice(len(synth_arr), n_samples, replace=False)]
         synth_arr = synth_arr[synth_inds]
     if n_samples < len(training_arr):
         training_inds = [np.random.choice(len(training_arr), n_samples, replace=False)]
         training_arr = training_arr[training_inds]
+
+    print(f'synth_arr.shape = {synth_arr.shape}')
+    print(f'training_arr.shape = {training_arr.shape}')
 
     # scaling the images to the right range of pixel values (**assuming PathologyGAN output with pixels \in (0,1))
     synth_arr = np.multiply(synth_arr, 255).astype(np.uint8)

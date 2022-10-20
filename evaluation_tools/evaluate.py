@@ -50,7 +50,7 @@ args = parser.parse_args()
 
 # checking file types and ensuring valid path
 assert args.synth_dataset[-3:] == '.h5' and args.training_dataset[-3:] == '.h5', 'Datasets must be .h5 files'
-if args.pickle_output_dir[-1] != '/':
+if args.pickle_output_dir is not None and args.pickle_output_dir[-1] != '/':
     args.pickle_output_dir += '/'
 
 synth_FID_dataset, real_FID_dataset = FID_dataset_prep(args.synth_dataset, args.training_dataset, args.n_samples,

@@ -5,7 +5,7 @@ import pickle
 from FID.fid import get_fid
 
 
-def FID_dataset_prep(synth_dataset, training_dataset, n_samples, output_dir=None, save_datasets=True):
+def fid_dataset_prep(synth_dataset, training_dataset, n_samples, output_dir=None, save_datasets=True):
     # data preparation – input: paths to image datasets the were input/output
     # for PathologyGAN, number of samples to be drawn for FID calculation
     # --> output: will write the real/fake datasets to pickle files at specified path
@@ -58,7 +58,8 @@ assert args.synth_dataset[-3:] == '.h5' and args.training_dataset[-3:] == '.h5',
 if args.pickle_output_dir is not None and args.pickle_output_dir[-1] != '/':
     args.pickle_output_dir += '/'
 
-synth_FID_dataset, real_FID_dataset = FID_dataset_prep(args.synth_dataset, args.training_dataset, args.n_samples_FID,
+print(f'args.save_FID_datasets = {args.save_FID_datasets}')
+synth_FID_dataset, real_FID_dataset = fid_dataset_prep(args.synth_dataset, args.training_dataset, args.n_samples_FID,
                                                        output_dir=args.pickle_output_dir,
                                                        save_datasets=args.save_FID_datasets)
 print(f'FID score on {args.n_samples_FID} samples = {get_fid(synth_FID_dataset, real_FID_dataset)}')

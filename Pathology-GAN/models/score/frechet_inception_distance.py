@@ -1,3 +1,5 @@
+# TODO: DELETE THIS SCRIPT, GOING TO USE DIFFERENT FID PIPELINE
+
 import tensorflow as tf
 import numpy as np
 from scipy import linalg

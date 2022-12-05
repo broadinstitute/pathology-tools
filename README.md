@@ -16,7 +16,13 @@ Experiments for different GAN problems related to histopathology image analysis
 ├── models
 ├── quantify_model_pipeline.py
 ├── real_features.py
-#------ To download and add ------
+# ---- pretrained CLAM patch_level=1 instance of PathologyGAN -------------
+├── pretrained_checkpoint
+├── PathologyGAN.ckt.data-00000-of-00001
+├── PathologyGAN.ckt.index
+├── PathologyGAN.ckt.meta
+└── checkpoint
+#------ To download and add (to mimic original PathologyGAN results) ------
 ├── dataset (not necessary for generate_image_interpolation.py but may be for other functions)
     └── vgh_nki (download from https://drive.google.com/open?id=1LpgW85CVA48C8LnpmsDMdHqeCGHKsAxw) 
 ├── data_model_output
@@ -26,16 +32,29 @@ Experiments for different GAN problems related to histopathology image analysis
                 ├── PathologyGAN.ckt.data-00000-of-00001 (download tar file from https://figshare.com/s/0a31)
                 ├── PathologyGAN.ckt.index
                 └── PathologyGAN.ckt.meta
-#---------------------------------
+#------------------------------------------------------------------------
 └── run_pathgan.py
 ```
 ### virtualenv
 `requirements.txt` can be used to create an environment via `pip install -r requirements.txt` after creating and activating a blank python (version 3.6.8) virtualenv.
 
 ### Usage
-This code is roughly equivalent to this repository (https://github.com/AdalbertoCq/Pathology-GAN) with slight changes to allow
-for simple generation of example images that interpolate from specified latent vectors.
+#### Synthetic Image Generation
+Generating images from a trained model works in the same way as the original PathologyGAN repo (https://github.com/AdalbertoCq/Pathology-GAN).
+A call to `generate_fake_samples.py` will be of the following form:
+```
+python generate_fake_samples.py --num_samples {number of images to generate} --batch_size {batch size} --z_dim {latent dimension - should match the checkpointed model} --checkpoint {path to checkpoint files}/PathologyGAN.ckt --main_path {output directory}
+```
+Model checkpoints are stored across multiple files so the path provided should point to the `.ckt` file, but it's required that
+that file is stored in the same directory as the other checkpoint files.
 
+The image generation method (`generate_samples_from_checkpoint()` in `features.py`) is configured to by default output files containing
+dictionaries that store each synthetic sample's corresponding latent vector (each vector being stored under the dictionary key matching
+the synthetic image's filename/number). These latents can be used for image interpolation, described below.
+
+
+#### Image Interpolation
+Slight changes to the image generation code allow for generation of example images that interpolate from specified latent vectors.
 `generate_image_interpolation.py` can be used to generate a set of images that interpolates between two input latents with the following call:
 ```
 python ./generate_image_interpolation.py --num_samples 100 --z_dim 200 --checkpoint data_model_output/PathologyGAN/h224_w224_n3_zdim_200/checkpoints/PathologyGAN.ckt --exemplar1 low_d_exemplar.pkl --exemplar2 high_d_exemplar.pkl
@@ -57,6 +76,12 @@ interpolation example. A call to the script under this mode can be made using th
 ```
 python ./generate_image_interpolation.py --num_samples 100 --z_dim 200 --checkpoint data_model_output/PathologyGAN/h224_w224_n3_zdim_200/checkpoints/PathologyGAN.ckt --exemplar1 low_d_cluster.pkl --exemplar2 high_d_cluster.pkl
 ```
+
+## Evaluation Tools
+Scripts for calulating FID and Inception Score provided in `/evaluation_tools/{FID, IS}` respectively (both directories
+contain a script with docstrings describing intended use). Code adapted from repos:
+- https://github.com/tsc2017/Frechet-Inception-Distance
+- https://github.com/tsc2017/Inception-Score
 
 ## Wasserstein_BiGAN
 ```

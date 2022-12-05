@@ -17,11 +17,11 @@ Experiments for different GAN problems related to histopathology image analysis
 ├── quantify_model_pipeline.py
 ├── real_features.py
 # ---- pretrained CLAM patch_level=1 instance of PathologyGAN -------------
-├── pretrained_checkpoint
-├── PathologyGAN.ckt.data-00000-of-00001
-├── PathologyGAN.ckt.index
-├── PathologyGAN.ckt.meta
-└── checkpoint
+└── pretrained_checkpoint
+    ├── PathologyGAN.ckt.data-00000-of-00001
+    ├── PathologyGAN.ckt.index
+    ├── PathologyGAN.ckt.meta
+    └── checkpoint
 #------ To download and add (to mimic original PathologyGAN results) ------
 ├── dataset (not necessary for generate_image_interpolation.py but may be for other functions)
     └── vgh_nki (download from https://drive.google.com/open?id=1LpgW85CVA48C8LnpmsDMdHqeCGHKsAxw) 

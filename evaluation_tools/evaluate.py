@@ -3,7 +3,7 @@ import h5py
 import numpy as np
 import pickle
 from FID.fid_tf1 import get_fid
-from IS.inception_score import get_inception_score
+from IS.inception_score_tf1 import get_inception_score
 
 
 def dataset_prep(synth_dataset, n_samples, training_dataset=None, output_dir=None, save_datasets=True, metric=None):

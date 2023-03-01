@@ -12,6 +12,7 @@ parser.add_argument('--model', dest='model', type=str, default='PathologyGAN', h
 parser.add_argument('--checkpoint', dest='checkpoint', required=False, help='Path to pre-trained weights (.ckt) of PathologyGAN.')
 parser.add_argument('--dataset', dest='dataset', type=str, help='Dataset/directory name for he slide h5 dataset')
 parser.add_argument('--input_img_dim', dest='input_img_dim', type=int, default=224, help='Dimension of input images (used for network instantiation)')
+parser.add_argument('--monitor_FID', action='store_true', dest='track_FID', help='Bool flag to trigger FID monitering during training')
 # parser.add_argument('--generator_dataset', dest='use_generator', type=bool,
 #                     default=False, help='Flag for using alternate dataset object')
 args = parser.parse_args()
@@ -54,6 +55,8 @@ n_critic = 5
 gp_coeff = .65
 use_bn = False
 loss_type = 'relativistic gradient penalty'
+# extra metrics to monitor during training
+track_FID = args.monitor_FID
 
 # setting labels flag to False if we give 'tcga' as our dataset (because those don't have labels)
 data = Data(dataset=dataset, marker=marker, patch_h=image_height, patch_w=image_width, n_channels=image_channels,
@@ -64,4 +67,4 @@ with tf.Graph().as_default():
                            learning_rate_g=learning_rate_g, learning_rate_d=learning_rate_d, beta_2=beta_2,
                            n_critic=n_critic, gp_coeff=gp_coeff, loss_type=loss_type, model_name=model)
     losses = pathgan.train(epochs, data_out_path, data, restore, print_epochs=10, n_images=10, show_epochs=None,
-                           check=checkpoint)
+                           check=checkpoint, track_FID=track_FID)

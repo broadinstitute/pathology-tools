@@ -154,12 +154,15 @@ class PathologyGAN(GAN):
 
     # Train function.
     def train(self, epochs, data_out_path, data, restore, show_epochs=100, print_epochs=10, n_images=10, save_img=False,
-              tracking=False, evaluation=None, check=None):
+              tracking=False, evaluation=None, check=None, track_FID=False):
         run_epochs = 0
         saver = tf.train.Saver()
 
         # Setups.
-        img_storage, latent_storage, checkpoints, csvs = setup_output(show_epochs, epochs, data, n_images, self.z_dim, data_out_path, self.model_name, restore, save_img)
+        # --> track_FID optional input flag fed from run_pathgan.py to trigger epoch-level monitoring of FID
+        img_storage, latent_storage, checkpoints, csvs = setup_output(show_epochs, epochs, data, n_images, self.z_dim,
+                                                                      data_out_path, self.model_name, restore, save_img,
+                                                                      track_FID=track_FID)
         losses = ['Generator Loss', 'Discriminator Loss']
         setup_csvs(csvs=csvs, model=self, losses=losses)
         report_parameters(self, epochs, restore, data_out_path)
@@ -188,6 +191,15 @@ class PathologyGAN(GAN):
             w_latent_out = session.run([self.w_latent_out], feed_dict=feed_dict)[0]
             w_latent_in = np.tile(w_latent_out[:,:, np.newaxis], [1, 1, self.layers+1])
 
+            # if tracking FID through training, storing a reference set of real images for comparison with synthetic images
+            # and a store for the running best FID achieved
+            # CALLING INTO HELPER FN TO GENERATE REAL DATASET FOR FID CALCULATION
+            real_samples_fid = None if track_FID is None \
+                # TODO: what's the right way to query the training set here?
+                #  --> data.training is the Dataset object, reasonable to have the helper function iterate through that?
+                else collect_fid_dataset_real(data.training)
+            minimum_fid = 1000000
+
             # Epoch Iteration.
             for epoch in range(1, epochs+1):
                 print(f'STARTING EPOCH {epoch}')
@@ -211,10 +223,23 @@ class PathologyGAN(GAN):
                     if run_epochs%self.n_critic == 0:
                         session.run([self.train_generator], feed_dict=feed_dict)
 
+                    # CALLING INTO HELPER FN TO GENERATE SYNTH DATASET FOR FID CALCULATION
                     # Print losses and Generate samples.
+                    # --> going to write a helper function in utils to collect the FID datasets
+                    synth_samples_fid = None if track_FID is None else \
+                                            gen_samples, _ = show_generated(session=session, z_input=self.z_input,
+                                                                            z_dim=self.z_dim,
+                                                                            output_fake=self.output_gen, n_images=10000,
+                                                                            show=False)
                     if run_epochs % print_epochs == 0:
                         epoch_loss_dis, epoch_loss_gen = session.run([self.loss_dis, self.loss_gen], feed_dict=feed_dict)
                         update_csv(model=self, file=csvs[0], variables=[epoch_loss_gen, epoch_loss_dis], epoch=epoch, iteration=run_epochs, losses=losses)
+                        # TODO: augment with FID calculation and csv update
+                        #  --> least trouble to add a copy of the fid_tf1.py file to the models/generative directory and add it to the import statements here
+                        # fid = get_fid(synth_samples_fid, real_samples_fid)
+                        # if fid < minimum_fid:
+                        #     minimum_fid = fid
+                        #     saver.save(sess=session, save_path=checkpoints[:-4]+'_FID.ckt') #<- sort out creating a separate checkpoint directory
 
                     run_epochs += 1
                     # break

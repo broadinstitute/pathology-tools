@@ -103,7 +103,14 @@ def update_csv(model, file, variables, epoch, iteration, losses):
 
 
 def setup_csvs(csvs, model, losses):
-    loss_csv, filters_s_csv, jacob_s_csv, hessian_s_csv = csvs
+    loss_csv = csvs[0]
+    filters_s_csv = csvs[1]
+    jacob_s_csv = csvs[2]
+    hessian_s_csv = csvs[3]
+    # check if csvs also includes path to FID-tracking csv
+    fid_csv = None
+    if len(csvs) == 5:
+        fid_csv = csvs[4]
 
     header = ['Epoch', 'Iteration']
     header.extend(losses)
@@ -128,13 +135,21 @@ def setup_csvs(csvs, model, losses):
         writer = csv.writer(csv_file)
         writer.writerow(header)
 
+    header = ['Epoch', 'Iteration']
+    with open(fid_csv, 'w') as csv_file:
+        writer = csv.DictWriter(csv_file, fieldnames=header)
+        writer.writeheader()
 
 # Setup output folder.
-def setup_output(show_epochs, epochs, data, n_images, z_dim, data_out_path, model_name, restore, save_img):
+def setup_output(show_epochs, epochs, data, n_images, z_dim, data_out_path, model_name, restore, save_img, track_FID=False):
     os.umask(0o002)
     evaluation_path = os.path.join(data_out_path, 'evaluation')
     checkpoints_path = os.path.join(data_out_path, 'checkpoints')
     checkpoints = os.path.join(checkpoints_path, '%s.ckt' % model_name)
+    # --- adding checkpoints directory for min-FID models so they don't collide with the default running checkpoint
+    checkpoints_path_FID = os.path.join(data_out_path, 'checkpoints_FID')
+    checkpoints_FID = os.path.join(checkpoints_path_FID, '%s.ckt' % model_name)
+    # -------
     gen_images_path = os.path.join(data_out_path, 'images')
     gen_images = os.path.join(gen_images_path, 'gen_images.h5')
     latent_images = os.path.join(gen_images_path, 'latent_images.h5')
@@ -143,6 +158,7 @@ def setup_output(show_epochs, epochs, data, n_images, z_dim, data_out_path, mode
     filters_s_csv = os.path.join(data_out_path, 'filter_singular_values.csv')
     jacob_s_csv = os.path.join(data_out_path, 'jacobian_singular_values.csv')
     hessian_s_csv = os.path.join(data_out_path, 'hessian_singular_values.csv')
+    fid_csv = None if not track_FID else os.path.join(data_out_path, 'FID.csv')
     
     if os.path.isdir(gen_images_path):
          shutil.rmtree(gen_images_path)
@@ -155,6 +171,9 @@ def setup_output(show_epochs, epochs, data, n_images, z_dim, data_out_path, mode
         if os.path.isdir(checkpoints_path):
             shutil.rmtree(checkpoints_path)
         os.makedirs(checkpoints_path)
+        if os.path.isdir(checkpoints_path_FID):
+            shutil.rmtree(checkpoints_path_FID)
+        os.makedirs(checkpoints_path_FID)
 
     image_height = data.training.patch_h
     image_width = data.training.patch_w
@@ -172,7 +191,11 @@ def setup_output(show_epochs, epochs, data, n_images, z_dim, data_out_path, mode
         img_storage = None
         latent_storage = None
 
-    return img_storage, latent_storage, checkpoints, [loss_csv, filters_s_csv, jacob_s_csv, hessian_s_csv]
+    csv_paths = [loss_csv, filters_s_csv, jacob_s_csv, hessian_s_csv]
+    if fid_csv is not None:
+        csv_paths.append(fid_csv)
+
+    return img_storage, latent_storage, checkpoints, csv_paths
 
 
 # Run session to generate output samples.
@@ -197,6 +220,22 @@ def show_generated(session, z_input, z_dim, output_fake, n_images, label_input=N
         plot_images(plt_num=n_images, images=np.array(gen_samples), dim=dim)    
     return np.array(gen_samples), np.array(sample_z)
 
+# -- following show_generated() usage from GAN class training method --
+def collect_fid_real_dataset(real_images, n_samples=10000):
+    """
+    helper method to collect the real image datasets to be used for FID calculation
+    """
+    # TODO: synthetic=False branch -- generate real dataset
+    real_samples = []
+    for b, _ in iter(real_images):
+        for im in b:
+            if len(real_samples) >= n_samples:
+                break
+            else:
+                real_samples.append(im)
+    return np.array(real_samples)
+    # ...yields an output of shape: (n_samples, 224, 224, 3)
+# --------
 
 # Method to report parameter in the run.
 def report_parameters(model, epochs, restore, data_out_path):

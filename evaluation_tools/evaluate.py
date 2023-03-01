@@ -2,12 +2,12 @@ import argparse
 import h5py
 import numpy as np
 import pickle
-from FID.fid import get_fid
+from FID.fid_tf1 import get_fid
 from IS.inception_score import get_inception_score
 
 
 def dataset_prep(synth_dataset, n_samples, training_dataset=None, output_dir=None, save_datasets=True, metric=None):
-    # data preparation – input: paths to image datasets the were input/output
+    # data preparation – input: paths to image datasets that were input/output
     # for PathologyGAN, number of samples to be drawn for FID or IS calculation
     # --> output: will write the real/fake datasets to pickle files at specified path
     assert metric.upper() in ['FID', 'IS'], 'Need to provide \'FID\' or \'IS\' as input for parameter \'metric\''

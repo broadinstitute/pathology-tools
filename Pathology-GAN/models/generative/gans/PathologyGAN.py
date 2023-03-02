@@ -237,11 +237,12 @@ class PathologyGAN(GAN):
                     # CALLING INTO HELPER FN TO GENERATE SYNTH DATASET FOR FID CALCULATION
                     # Print losses and Generate samples.
                     # --> going to write a helper function in utils to collect the FID datasets
-                    synth_samples_fid = None if track_FID is None else \
-                                            gen_samples, _ = show_generated(session=session, z_input=self.z_input,
-                                                                            z_dim=self.z_dim,
-                                                                            output_fake=self.output_gen, n_images=10000,
-                                                                            show=False)
+                    synth_samples_fid = None
+                    if track_FID is not None:
+                        synth_samples_fid, _ = show_generated(session=session, z_input=self.z_input,
+                                                              z_dim=self.z_dim,
+                                                              output_fake=self.output_gen, n_images=10000,
+                                                              show=False)
                     # ----- debug -------
                     # * need to give get_fid() images of shape (n_sample, 3, H, W)
                     print(f'synth_samples_fid.shape={synth_samples_fid.shape}')

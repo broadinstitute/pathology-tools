@@ -269,17 +269,18 @@ class PathologyGAN(GAN):
                         #  --> added copy of fid_tf1.py to models/generative/ directory; imported at the top of this script
                         #  ** Need to prepare synthetic and real datasets for fid calculation (RE reshaping)
                         #  **==> what shape are the synthetic samples being generated in?
-                        synth_samples_fid = dataset_prep_from_numpy(synth_samples_fid)
-                        real_samples_fid = dataset_prep_from_numpy(real_samples_fid)
-                        fid = get_fid(synth_samples_fid, real_samples_fid)
-                        # log FID
-                        update_csv(model=self, file=csvs[-1], variables=fid, epoch=epoch, iteration=run_epochs, losses=None)
-                        if fid < minimum_fid:
-                            # debug
-                            print(f'previous min FID of {minimum_fid} beaten by new minimum of {fid}')
-                            minimum_fid = fid
-                            # TODO: separate checkpoint directory for FID checkpoints?
-                            saver.save(sess=session, save_path=checkpoints[:-4]+'_FID.ckt')
+                        if track_FID:
+                            synth_samples_fid = dataset_prep_from_numpy(synth_samples_fid)
+                            real_samples_fid = dataset_prep_from_numpy(real_samples_fid)
+                            fid = get_fid(synth_samples_fid, real_samples_fid)
+                            # log FID
+                            update_csv(model=self, file=csvs[-1], variables=fid, epoch=epoch, iteration=run_epochs, losses=None)
+                            if fid < minimum_fid:
+                                # debug
+                                print(f'previous min FID of {minimum_fid} beaten by new minimum of {fid}')
+                                minimum_fid = fid
+                                # TODO: separate checkpoint directory for FID checkpoints?
+                                saver.save(sess=session, save_path=checkpoints[:-4]+'_FID.ckt')
 
                     run_epochs += 1
                     # break

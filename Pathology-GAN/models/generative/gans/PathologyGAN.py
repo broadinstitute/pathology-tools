@@ -272,7 +272,7 @@ class PathologyGAN(GAN):
                             real_samples_fid = dataset_prep_from_numpy(real_samples_fid)
                             fid = get_fid(synth_samples_fid, real_samples_fid)
                             # log FID
-                            update_csv(model=self, file=csvs[-1], variables=fid, epoch=epoch, iteration=run_epochs, losses=None)
+                            update_csv(model=self, file=csvs[-1], variables=[fid], epoch=epoch, iteration=run_epochs, losses=None)
                             if fid < minimum_fid:
                                 # debug
                                 print(f'previous min FID of {minimum_fid} beaten by new minimum of {fid}')

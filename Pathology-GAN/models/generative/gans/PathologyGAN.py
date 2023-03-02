@@ -206,7 +206,8 @@ class PathologyGAN(GAN):
             # --> data.training is the Dataset object, reasonable to have the helper function iterate through that?
             real_samples_fid = None if not track_FID else collect_fid_real_dataset(data.training)
             # ----- debug -------
-            print(f'real_samples_fid.shape={real_samples_fid.shape}')
+            if real_samples_fid is not None:
+                print(f'real_samples_fid.shape={real_samples_fid.shape}')
             # -------------------
             minimum_fid = 1000000
 
@@ -257,9 +258,9 @@ class PathologyGAN(GAN):
                         #                                       z_dim=self.z_dim,
                         #                                       output_fake=self.output_gen, n_images=10000,
                         #                                       show=False)
-                    # ----- debug -------
-                    # * need to give get_fid() images of shape (n_sample, 3, H, W)
-                    print(f'synth_samples_fid.shape={synth_samples_fid.shape}')
+                        # ----- debug -------
+                        # * need to give get_fid() images of shape (n_sample, 3, H, W)
+                        print(f'synth_samples_fid.shape={synth_samples_fid.shape}')
                     # -------------------
                     if run_epochs % print_epochs == 0:
                         epoch_loss_dis, epoch_loss_gen = session.run([self.loss_dis, self.loss_gen], feed_dict=feed_dict)

@@ -141,10 +141,11 @@ def setup_csvs(csvs, model, losses):
         writer = csv.writer(csv_file)
         writer.writerow(header)
 
-    header = ['Epoch', 'Iteration']
-    with open(fid_csv, 'w') as csv_file:
-        writer = csv.DictWriter(csv_file, fieldnames=header)
-        writer.writeheader()
+    if len(csvs) == 5:
+        header = ['Epoch', 'Iteration']
+        with open(fid_csv, 'w') as csv_file:
+            writer = csv.DictWriter(csv_file, fieldnames=header)
+            writer.writeheader()
 
 # Setup output folder.
 def setup_output(show_epochs, epochs, data, n_images, z_dim, data_out_path, model_name, restore, save_img, track_FID=False):

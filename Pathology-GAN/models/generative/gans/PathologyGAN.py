@@ -252,7 +252,7 @@ class PathologyGAN(GAN):
                         # -----------------------------------------------------------------
                         # debug -- trying to understand image gen using session.run and feed_dict
                         print(f'type(synth_samples_fid)={type(synth_samples_fid)}; synth_samples_fid.shape={synth_samples_fid.shape}')
-                        print(f'samples generated with feed_dict={feed_dict}')
+                        print(f'samples generated with feed_dict={feed_dict_fid_synth}')
                         # synth_samples_fid, _ = show_generated(session=session, z_input=self.w_latent,
                         #                                       z_dim=self.z_dim,
                         #                                       output_fake=self.output_gen, n_images=10000,

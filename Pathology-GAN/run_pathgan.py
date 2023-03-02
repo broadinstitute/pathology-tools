@@ -10,6 +10,7 @@ parser.add_argument('--epochs', dest='epochs', type=int, default=45, help='Numbe
 parser.add_argument('--batch_size', dest='batch_size', type=int, default=64, help='Batch size, default size is 64.')
 parser.add_argument('--model', dest='model', type=str, default='PathologyGAN', help='Model name.')
 parser.add_argument('--checkpoint', dest='checkpoint', required=False, help='Path to pre-trained weights (.ckt) of PathologyGAN.')
+parser.add_argument('--main_path', dest='main_path', required=True, help='Main path for output data')
 parser.add_argument('--dataset', dest='dataset', type=str, help='Dataset/directory name for he slide h5 dataset')
 parser.add_argument('--input_img_dim', dest='input_img_dim', type=int, default=224, help='Dimension of input images (used for network instantiation)')
 parser.add_argument('--monitor_FID', action='store_true', dest='track_FID', help='Bool flag to trigger FID monitering during training')
@@ -22,7 +23,8 @@ model = args.model
 checkpoint = args.checkpoint
 input_img_dim = args.input_img_dim
 
-main_path = os.path.dirname(os.path.realpath(__file__))
+# requiring main_path be taken as input; feels dangerous to formulate it automatically (i.e., higher risk of collision?)
+main_path = args.main_path #os.path.dirname(os.path.realpath(__file__))
 dbs_path = os.path.dirname(os.path.realpath(__file__))
 
 # Dataset information.

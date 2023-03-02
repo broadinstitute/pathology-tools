@@ -69,8 +69,6 @@ def get_checkpoint(data_out_path, which=0):
 
 
 def update_csv(model, file, variables, epoch, iteration, losses):
-    # debug
-    print(f'UPDATE_CSV called with file={file}; variables={variables}')
     with open(file, 'a') as csv_file:
         if 'loss' in file: 
             header = ['Epoch', 'Iteration']

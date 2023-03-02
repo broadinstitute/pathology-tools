@@ -159,7 +159,7 @@ class PathologyGAN(GAN):
         run_epochs = 0
         saver = tf.train.Saver()
         # number of samples to be used in FID calculation (if FID is being tracked)
-        n_samples_fid = 1000
+        n_samples_fid = 5000
 
         # Setups.
         # --> track_FID optional input flag fed from run_pathgan.py to trigger epoch-level monitoring of FID

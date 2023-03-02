@@ -163,9 +163,13 @@ class PathologyGAN(GAN):
 
         # Setups.
         # --> track_FID optional input flag fed from run_pathgan.py to trigger epoch-level monitoring of FID
-        img_storage, latent_storage, checkpoints, csvs = setup_output(show_epochs, epochs, data, n_images, self.z_dim,
-                                                                      data_out_path, self.model_name, restore, save_img,
-                                                                      track_FID=track_FID)
+        img_storage, latent_storage, checkpoint_dirs, csvs = setup_output(show_epochs, epochs, data, n_images, self.z_dim,
+                                                                          data_out_path, self.model_name, restore, save_img,
+                                                                          track_FID=track_FID)
+        # ** checkpoint_dirs: list that will optionally include FID checkpoint directory
+        checkpoints = checkpoint_dirs[0]
+        checkpoints_fid = None if len(checkpoint_dirs) == 1 else checkpoint_dirs[1]
+
         losses = ['Generator Loss', 'Discriminator Loss']
         setup_csvs(csvs=csvs, model=self, losses=losses)
         report_parameters(self, epochs, restore, data_out_path)
@@ -204,14 +208,11 @@ class PathologyGAN(GAN):
 
             # if tracking FID through training, storing a reference set of real images for comparison with synthetic images
             # and a store for the running best FID achieved
-            # CALLING INTO HELPER FN TO GENERATE REAL DATASET FOR FID CALCULATION
-            # --> data.training is the Dataset object, reasonable to have the helper function iterate through that?
             real_samples_fid = None if not track_FID else collect_fid_real_dataset(data.training, n_samples=n_samples_fid)
-            # ----- debug -------
             if real_samples_fid is not None:
+                # debug
                 print(f'real_samples_fid.shape={real_samples_fid.shape}')
                 real_samples_fid = dataset_prep_from_numpy(real_samples_fid)
-            # -------------------
             minimum_fid = 1000000
 
             # Epoch Iteration.
@@ -241,44 +242,34 @@ class PathologyGAN(GAN):
                     if run_epochs % print_epochs == 0:
                         epoch_loss_dis, epoch_loss_gen = session.run([self.loss_dis, self.loss_gen], feed_dict=feed_dict)
                         update_csv(model=self, file=csvs[0], variables=[epoch_loss_gen, epoch_loss_dis], epoch=epoch, iteration=run_epochs, losses=losses)
-                        # ==== FID CALCULATION/IMAGE_GEN ====
-                        if track_FID:
-                            # how to specify the number of samples generated in this way?
-                            # --> (I think) we specify number with the number of input latents we give to self.output_gen
-                            # --> below: logic for controlled image gen from generate_samples_from_checkpoint()
-                            # -----------------------------------------------------------------
-                            print(f'GENERATING SYNTH FID DATASET')
-                            z_latent_batch_fid_synth = np.random.normal(size=(n_samples_fid, self.z_dim))
-                            feed_dict_fid_synth = {self.z_input_1: z_latent_batch_fid_synth}
-                            w_latent_batch_fid_synth = session.run([self.w_latent_out], feed_dict=feed_dict_fid_synth)[0]
-                            # print(f'w_latent_batch_fid_synth.shape={w_latent_batch_fid_synth.shape}')
-                            w_latent_in_fid_synth = np.tile(w_latent_batch_fid_synth[:, :, np.newaxis],
-                                                            [1, 1, self.layers + 1])
-                            # print(f'w_latent_in_fid_synth.shape={w_latent_in_fid_synth.shape}')
-                            feed_dict_fid_synth = {self.w_latent_in: w_latent_in_fid_synth}
-                            synth_samples_fid = session.run([self.output_gen], feed_dict=feed_dict_fid_synth)[0]
-                            # -----------------------------------------------------------------
-                            # synth_samples_fid, _ = show_generated(session=session, z_input=self.w_latent,
-                            #                                       z_dim=self.z_dim,
-                            #                                       output_fake=self.output_gen, n_images=10000,
-                            #                                       show=False)
-                            # ----- debug -------
-                            # * need to give get_fid() images of shape (n_sample, 3, H, W)
-                            print(f'synth_samples_fid.shape={synth_samples_fid.shape}')
-                        # -------------------
-                            synth_samples_fid = dataset_prep_from_numpy(synth_samples_fid)
-                            fid = get_fid(synth_samples_fid, real_samples_fid)
-                            # log FID
-                            update_csv(model=self, file=csvs[-1], variables=[fid], epoch=epoch, iteration=run_epochs, losses=None)
-                            if fid < minimum_fid:
-                                # debug
-                                print(f'previous min FID of {minimum_fid} beaten by new minimum of {fid}')
-                                minimum_fid = fid
-                                # TODO: separate checkpoint directory for FID checkpoints?
-                                saver.save(sess=session, save_path=checkpoints[:-4]+'_FID.ckt')
 
                     run_epochs += 1
                     # break
+
+                # ==== FID CALCULATION/IMAGE_GEN ====
+                if track_FID:
+                    print(f'GENERATING SYNTH FID DATASET')
+                    z_latent_batch_fid_synth = np.random.normal(size=(n_samples_fid, self.z_dim))
+                    feed_dict_fid_synth = {self.z_input_1: z_latent_batch_fid_synth}
+                    w_latent_batch_fid_synth = session.run([self.w_latent_out], feed_dict=feed_dict_fid_synth)[0]
+                    w_latent_in_fid_synth = np.tile(w_latent_batch_fid_synth[:, :, np.newaxis],
+                                                    [1, 1, self.layers + 1])
+                    feed_dict_fid_synth = {self.w_latent_in: w_latent_in_fid_synth}
+                    synth_samples_fid = session.run([self.output_gen], feed_dict=feed_dict_fid_synth)[0]
+                    print(f'synth_samples_fid.shape={synth_samples_fid.shape}')
+                    synth_samples_fid = dataset_prep_from_numpy(synth_samples_fid)
+                    fid = get_fid(synth_samples_fid, real_samples_fid)
+                    # log FID
+                    update_csv(model=self, file=csvs[-1], variables=[fid], epoch=epoch, iteration=run_epochs,
+                               losses=None)
+                    if fid < minimum_fid:
+                        # debug
+                        print(f'previous min FID of {minimum_fid} beaten by new minimum of {fid}')
+                        minimum_fid = fid
+                        # TODO: right way of doing this string manipulation to store checkpoints with epoch suffixes?
+                        saver.save(sess=session, save_path=checkpoints_fid[:-4]+'_epoch'+str(epoch)+'.ckt')
+                # ================================
+
                 data.training.reset()
 
                 # After each epoch dump a sample of generated images.

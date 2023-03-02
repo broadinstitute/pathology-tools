@@ -202,7 +202,9 @@ def setup_output(show_epochs, epochs, data, n_images, z_dim, data_out_path, mode
     if fid_csv is not None:
         csv_paths.append(fid_csv)
 
-    return img_storage, latent_storage, checkpoints, csv_paths
+    checkpoint_dirs = [checkpoints] if not track_FID else [checkpoints, checkpoints_FID]
+
+    return img_storage, latent_storage, checkpoint_dirs, csv_paths
 
 
 # Run session to generate output samples.

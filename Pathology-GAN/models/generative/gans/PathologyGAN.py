@@ -238,10 +238,15 @@ class PathologyGAN(GAN):
                     # --> going to write a helper function in utils to collect the FID datasets
                     synth_samples_fid = None
                     if track_FID:
-                        synth_samples_fid, _ = show_generated(session=session, z_input=self.w_latent,
-                                                              z_dim=self.z_dim,
-                                                              output_fake=self.output_gen, n_images=10000,
-                                                              show=False)
+                        # how to specify the number of samples generated in this way?
+                        synth_samples_fid = session.run([self.output_gen], feed_dict=feed_dict)[0]
+                        # debug -- trying to understand image gen using session.run and feed_dict
+                        print(f'type(synth_samples_fid)={type(synth_samples_fid)}; synth_samples_fid.shape={synth_samples_fid.shape}')
+                        print(f'samples generated with feed_dict={feed_dict}')
+                        # synth_samples_fid, _ = show_generated(session=session, z_input=self.w_latent,
+                        #                                       z_dim=self.z_dim,
+                        #                                       output_fake=self.output_gen, n_images=10000,
+                        #                                       show=False)
                     # ----- debug -------
                     # * need to give get_fid() images of shape (n_sample, 3, H, W)
                     print(f'synth_samples_fid.shape={synth_samples_fid.shape}')

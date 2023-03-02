@@ -5,6 +5,7 @@ from data_manipulation.utils import *
 from models.evaluation.features import *
 from models.generative.ops import *
 from models.generative.utils import *
+from models.generative.fid_tf1 import dataset_prep_from_numpy, get_fid #<- copy of tf1 FID script from eval tools
 from models.generative.tools import *
 from models.generative.loss import *
 from models.generative.regularizers import *
@@ -167,6 +168,14 @@ class PathologyGAN(GAN):
         setup_csvs(csvs=csvs, model=self, losses=losses)
         report_parameters(self, epochs, restore, data_out_path)
 
+        # debug: FID tracking
+        # -------------------
+        print(f'TRAINING: track_FID={track_FID}')
+        print('csvs:')
+        for csv_path in csvs:
+            print(csv_path)
+        # -------------------
+
         # Training session.
         config = tf.ConfigProto()
         config.gpu_options.allow_growth = True
@@ -194,10 +203,12 @@ class PathologyGAN(GAN):
             # if tracking FID through training, storing a reference set of real images for comparison with synthetic images
             # and a store for the running best FID achieved
             # CALLING INTO HELPER FN TO GENERATE REAL DATASET FOR FID CALCULATION
+            # --> data.training is the Dataset object, reasonable to have the helper function iterate through that?
             real_samples_fid = None if track_FID is None \
-                # TODO: what's the right way to query the training set here?
-                #  --> data.training is the Dataset object, reasonable to have the helper function iterate through that?
                 else collect_fid_dataset_real(data.training)
+            # ----- debug -------
+            print(f'real_samples_fid.shape={real_samples_fid.shape}')
+            # -------------------
             minimum_fid = 1000000
 
             # Epoch Iteration.
@@ -231,15 +242,28 @@ class PathologyGAN(GAN):
                                                                             z_dim=self.z_dim,
                                                                             output_fake=self.output_gen, n_images=10000,
                                                                             show=False)
+                    # ----- debug -------
+                    # * need to give get_fid() images of shape (n_sample, 3, H, W)
+                    print(f'synth_samples_fid.shape={synth_samples_fid.shape}')
+                    # -------------------
                     if run_epochs % print_epochs == 0:
                         epoch_loss_dis, epoch_loss_gen = session.run([self.loss_dis, self.loss_gen], feed_dict=feed_dict)
                         update_csv(model=self, file=csvs[0], variables=[epoch_loss_gen, epoch_loss_dis], epoch=epoch, iteration=run_epochs, losses=losses)
                         # TODO: augment with FID calculation and csv update
-                        #  --> least trouble to add a copy of the fid_tf1.py file to the models/generative directory and add it to the import statements here
-                        # fid = get_fid(synth_samples_fid, real_samples_fid)
-                        # if fid < minimum_fid:
-                        #     minimum_fid = fid
-                        #     saver.save(sess=session, save_path=checkpoints[:-4]+'_FID.ckt') #<- sort out creating a separate checkpoint directory
+                        #  --> added copy of fid_tf1.py to models/generative/ directory; imported at the top of this script
+                        #  ** Need to prepare synthetic and real datasets for fid calculation (RE reshaping)
+                        #  **==> what shape are the synthetic samples being generated in?
+                        synth_samples_fid = dataset_prep_from_numpy(synth_samples_fid)
+                        real_samples_fid = dataset_prep_from_numpy(real_samples_fid)
+                        fid = get_fid(synth_samples_fid, real_samples_fid)
+                        # log FID
+                        update_csv(model=self, file=csvs[-1], variables=fid, epoch=epoch, iteration=run_epochs, losses=None)
+                        if fid < minimum_fid:
+                            # debug
+                            print(f'previous min FID of {minimum_fid} beaten by new minimum of {fid}')
+                            minimum_fid = fid
+                            # TODO: separate checkpoint directory for FID checkpoints?
+                            saver.save(sess=session, save_path=checkpoints[:-4]+'_FID.ckt')
 
                     run_epochs += 1
                     # break

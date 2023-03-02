@@ -69,6 +69,8 @@ def get_checkpoint(data_out_path, which=0):
 
 
 def update_csv(model, file, variables, epoch, iteration, losses):
+    # debug
+    print(f'UPDATE_CSV called with file={file}; variables={variables}')
     with open(file, 'a') as csv_file:
         if 'loss' in file: 
             header = ['Epoch', 'Iteration']
@@ -96,6 +98,10 @@ def update_csv(model, file, variables, epoch, iteration, losses):
             line = [epoch, iteration]
             line.extend(variables)
         elif 'hessian' in file:
+            writer = csv.writer(csv_file)
+            line = [epoch, iteration]
+            line.extend(variables)
+        elif 'FID' in file:
             writer = csv.writer(csv_file)
             line = [epoch, iteration]
             line.extend(variables)

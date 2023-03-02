@@ -234,42 +234,40 @@ class PathologyGAN(GAN):
                     if run_epochs%self.n_critic == 0:
                         session.run([self.train_generator], feed_dict=feed_dict)
 
-                    # CALLING INTO HELPER FN TO GENERATE SYNTH DATASET FOR FID CALCULATION
                     # Print losses and Generate samples.
-                    # --> going to write a helper function in utils to collect the FID datasets
-                    synth_samples_fid = None
-                    if track_FID:
-                        # how to specify the number of samples generated in this way?
-                        # --> (I think) we specify number with the number of input latents we give to self.output_gen
-                        # --> below: logic for controlled image gen from generate_samples_from_checkpoint()
-                        # -----------------------------------------------------------------
-                        n_samples_fid = 10000
-                        z_latent_batch_fid_synth = np.random.normal(size=(n_samples_fid, self.z_dim))
-                        feed_dict_fid_synth = {self.z_input_1: z_latent_batch_fid_synth}
-                        w_latent_batch_fid_synth = session.run([self.w_latent_out], feed_dict=feed_dict_fid_synth)[0]
-                        w_latent_in_fid_synth = np.tile(w_latent_batch_fid_synth[:, :, np.newaxis], [1, 1, self.layers + 1])
-                        feed_dict_fid_synth = {self.w_latent_in: w_latent_in_fid_synth}
-                        synth_samples_fid = session.run([self.output_gen], feed_dict=feed_dict_fid_synth)[0]
-                        # -----------------------------------------------------------------
-                        # debug -- trying to understand image gen using session.run and feed_dict
-                        print(f'type(synth_samples_fid)={type(synth_samples_fid)}; synth_samples_fid.shape={synth_samples_fid.shape}')
-                        print(f'samples generated with feed_dict={feed_dict_fid_synth}')
-                        # synth_samples_fid, _ = show_generated(session=session, z_input=self.w_latent,
-                        #                                       z_dim=self.z_dim,
-                        #                                       output_fake=self.output_gen, n_images=10000,
-                        #                                       show=False)
-                        # ----- debug -------
-                        # * need to give get_fid() images of shape (n_sample, 3, H, W)
-                        print(f'synth_samples_fid.shape={synth_samples_fid.shape}')
-                    # -------------------
                     if run_epochs % print_epochs == 0:
                         epoch_loss_dis, epoch_loss_gen = session.run([self.loss_dis, self.loss_gen], feed_dict=feed_dict)
                         update_csv(model=self, file=csvs[0], variables=[epoch_loss_gen, epoch_loss_dis], epoch=epoch, iteration=run_epochs, losses=losses)
-                        # TODO: augment with FID calculation and csv update
-                        #  --> added copy of fid_tf1.py to models/generative/ directory; imported at the top of this script
-                        #  ** Need to prepare synthetic and real datasets for fid calculation (RE reshaping)
-                        #  **==> what shape are the synthetic samples being generated in?
+                        # ==== FID CALCULATION/IMAGE_GEN ====
                         if track_FID:
+                            # how to specify the number of samples generated in this way?
+                            # --> (I think) we specify number with the number of input latents we give to self.output_gen
+                            # --> below: logic for controlled image gen from generate_samples_from_checkpoint()
+                            # -----------------------------------------------------------------
+                            print(f'GENERATING SYNTH FID DATASET')
+                            n_samples_fid = 10000
+                            z_latent_batch_fid_synth = np.random.normal(size=(n_samples_fid, self.z_dim))
+                            feed_dict_fid_synth = {self.z_input_1: z_latent_batch_fid_synth}
+                            w_latent_batch_fid_synth = session.run([self.w_latent_out], feed_dict=feed_dict_fid_synth)[0]
+                            print(f'w_latent_batch_fid_synth.shape={w_latent_batch_fid_synth.shape}')
+                            w_latent_in_fid_synth = np.tile(w_latent_batch_fid_synth[:, :, np.newaxis],
+                                                            [1, 1, self.layers + 1])
+                            print(f'w_latent_in_fid_synth.shape={w_latent_in_fid_synth.shape}')
+                            feed_dict_fid_synth = {self.w_latent_in: w_latent_in_fid_synth}
+                            synth_samples_fid = session.run([self.output_gen], feed_dict=feed_dict_fid_synth)[0]
+                            # -----------------------------------------------------------------
+                            # debug -- trying to understand image gen using session.run and feed_dict
+                            print(
+                                f'type(synth_samples_fid)={type(synth_samples_fid)}; synth_samples_fid.shape={synth_samples_fid.shape}')
+                            print(f'samples generated with feed_dict={feed_dict_fid_synth}')
+                            # synth_samples_fid, _ = show_generated(session=session, z_input=self.w_latent,
+                            #                                       z_dim=self.z_dim,
+                            #                                       output_fake=self.output_gen, n_images=10000,
+                            #                                       show=False)
+                            # ----- debug -------
+                            # * need to give get_fid() images of shape (n_sample, 3, H, W)
+                            print(f'synth_samples_fid.shape={synth_samples_fid.shape}')
+                        # -------------------
                             synth_samples_fid = dataset_prep_from_numpy(synth_samples_fid)
                             real_samples_fid = dataset_prep_from_numpy(real_samples_fid)
                             fid = get_fid(synth_samples_fid, real_samples_fid)

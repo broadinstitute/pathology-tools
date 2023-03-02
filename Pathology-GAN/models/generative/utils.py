@@ -239,10 +239,9 @@ def collect_fid_real_dataset(real_images, n_samples=10000):
         print(f'len(real_samples) = {len(real_samples)}')
         for im in b:
             if len(real_samples) >= n_samples:
-                break
+                return np.array(real_samples)
             else:
                 real_samples.append(im)
-    return np.array(real_samples)
     # ...yields an output of shape: (n_samples, 224, 224, 3)
 # --------
 

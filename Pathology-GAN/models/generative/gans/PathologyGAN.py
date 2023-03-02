@@ -245,7 +245,7 @@ class PathologyGAN(GAN):
                             # --> below: logic for controlled image gen from generate_samples_from_checkpoint()
                             # -----------------------------------------------------------------
                             print(f'GENERATING SYNTH FID DATASET')
-                            n_samples_fid = 10000
+                            n_samples_fid = 100
                             z_latent_batch_fid_synth = np.random.normal(size=(n_samples_fid, self.z_dim))
                             feed_dict_fid_synth = {self.z_input_1: z_latent_batch_fid_synth}
                             w_latent_batch_fid_synth = session.run([self.w_latent_out], feed_dict=feed_dict_fid_synth)[0]

@@ -228,7 +228,7 @@ def show_generated(session, z_input, z_dim, output_fake, n_images, label_input=N
     return np.array(gen_samples), np.array(sample_z)
 
 # -- following show_generated() usage from GAN class training method --
-def collect_fid_real_dataset(real_images, n_samples=10000):
+def collect_fid_real_dataset(real_images, n_samples=100):
     """
     helper method to collect the real image datasets to be used for FID calculation
     """

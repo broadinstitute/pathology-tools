@@ -232,9 +232,11 @@ def collect_fid_real_dataset(real_images, n_samples=10000):
     """
     helper method to collect the real image datasets to be used for FID calculation
     """
-    # TODO: synthetic=False branch -- generate real dataset
+    # debug
+    print('COLLECTING REAL DATASET FOR FID COMPARISON')
     real_samples = []
     for b, _ in iter(real_images):
+        print(f'len(real_samples) = {len(real_samples)}')
         for im in b:
             if len(real_samples) >= n_samples:
                 break

@@ -204,8 +204,7 @@ class PathologyGAN(GAN):
             # and a store for the running best FID achieved
             # CALLING INTO HELPER FN TO GENERATE REAL DATASET FOR FID CALCULATION
             # --> data.training is the Dataset object, reasonable to have the helper function iterate through that?
-            real_samples_fid = None if track_FID is None \
-                else collect_fid_dataset_real(data.training)
+            real_samples_fid = None if not track_FID else collect_fid_dataset_real(data.training)
             # ----- debug -------
             print(f'real_samples_fid.shape={real_samples_fid.shape}')
             # -------------------
@@ -238,7 +237,7 @@ class PathologyGAN(GAN):
                     # Print losses and Generate samples.
                     # --> going to write a helper function in utils to collect the FID datasets
                     synth_samples_fid = None
-                    if track_FID is not None:
+                    if track_FID:
                         synth_samples_fid, _ = show_generated(session=session, z_input=self.z_input,
                                                               z_dim=self.z_dim,
                                                               output_fake=self.output_gen, n_images=10000,

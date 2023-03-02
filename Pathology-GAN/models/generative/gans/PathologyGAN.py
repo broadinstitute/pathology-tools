@@ -238,7 +238,7 @@ class PathologyGAN(GAN):
                     # --> going to write a helper function in utils to collect the FID datasets
                     synth_samples_fid = None
                     if track_FID:
-                        synth_samples_fid, _ = show_generated(session=session, z_input=self.z_input,
+                        synth_samples_fid, _ = show_generated(session=session, z_input=self.w_latent,
                                                               z_dim=self.z_dim,
                                                               output_fake=self.output_gen, n_images=10000,
                                                               show=False)

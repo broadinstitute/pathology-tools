@@ -158,6 +158,8 @@ class PathologyGAN(GAN):
               tracking=False, evaluation=None, check=None, track_FID=False):
         run_epochs = 0
         saver = tf.train.Saver()
+        # number of samples to be used in FID calculation (if FID is being tracked)
+        n_samples_fid = 1000
 
         # Setups.
         # --> track_FID optional input flag fed from run_pathgan.py to trigger epoch-level monitoring of FID
@@ -204,10 +206,11 @@ class PathologyGAN(GAN):
             # and a store for the running best FID achieved
             # CALLING INTO HELPER FN TO GENERATE REAL DATASET FOR FID CALCULATION
             # --> data.training is the Dataset object, reasonable to have the helper function iterate through that?
-            real_samples_fid = None if not track_FID else collect_fid_real_dataset(data.training)
+            real_samples_fid = None if not track_FID else collect_fid_real_dataset(data.training, n_samples=n_samples_fid)
             # ----- debug -------
             if real_samples_fid is not None:
                 print(f'real_samples_fid.shape={real_samples_fid.shape}')
+                real_samples_fid = dataset_prep_from_numpy(real_samples_fid)
             # -------------------
             minimum_fid = 1000000
 
@@ -245,21 +248,16 @@ class PathologyGAN(GAN):
                             # --> below: logic for controlled image gen from generate_samples_from_checkpoint()
                             # -----------------------------------------------------------------
                             print(f'GENERATING SYNTH FID DATASET')
-                            n_samples_fid = 100
                             z_latent_batch_fid_synth = np.random.normal(size=(n_samples_fid, self.z_dim))
                             feed_dict_fid_synth = {self.z_input_1: z_latent_batch_fid_synth}
                             w_latent_batch_fid_synth = session.run([self.w_latent_out], feed_dict=feed_dict_fid_synth)[0]
-                            print(f'w_latent_batch_fid_synth.shape={w_latent_batch_fid_synth.shape}')
+                            # print(f'w_latent_batch_fid_synth.shape={w_latent_batch_fid_synth.shape}')
                             w_latent_in_fid_synth = np.tile(w_latent_batch_fid_synth[:, :, np.newaxis],
                                                             [1, 1, self.layers + 1])
-                            print(f'w_latent_in_fid_synth.shape={w_latent_in_fid_synth.shape}')
+                            # print(f'w_latent_in_fid_synth.shape={w_latent_in_fid_synth.shape}')
                             feed_dict_fid_synth = {self.w_latent_in: w_latent_in_fid_synth}
                             synth_samples_fid = session.run([self.output_gen], feed_dict=feed_dict_fid_synth)[0]
                             # -----------------------------------------------------------------
-                            # debug -- trying to understand image gen using session.run and feed_dict
-                            print(
-                                f'type(synth_samples_fid)={type(synth_samples_fid)}; synth_samples_fid.shape={synth_samples_fid.shape}')
-                            print(f'samples generated with feed_dict={feed_dict_fid_synth}')
                             # synth_samples_fid, _ = show_generated(session=session, z_input=self.w_latent,
                             #                                       z_dim=self.z_dim,
                             #                                       output_fake=self.output_gen, n_images=10000,
@@ -269,7 +267,6 @@ class PathologyGAN(GAN):
                             print(f'synth_samples_fid.shape={synth_samples_fid.shape}')
                         # -------------------
                             synth_samples_fid = dataset_prep_from_numpy(synth_samples_fid)
-                            real_samples_fid = dataset_prep_from_numpy(real_samples_fid)
                             fid = get_fid(synth_samples_fid, real_samples_fid)
                             # log FID
                             update_csv(model=self, file=csvs[-1], variables=[fid], epoch=epoch, iteration=run_epochs, losses=None)

@@ -239,7 +239,17 @@ class PathologyGAN(GAN):
                     synth_samples_fid = None
                     if track_FID:
                         # how to specify the number of samples generated in this way?
-                        synth_samples_fid = session.run([self.output_gen], feed_dict=feed_dict)[0]
+                        # --> (I think) we specify number with the number of input latents we give to self.output_gen
+                        # --> below: logic for controlled image gen from generate_samples_from_checkpoint()
+                        # -----------------------------------------------------------------
+                        n_samples_fid = 10000
+                        z_latent_batch_fid_synth = np.random.normal(size=(n_samples_fid, self.z_dim))
+                        feed_dict_fid_synth = {self.z_input_1: z_latent_batch_fid_synth}
+                        w_latent_batch_fid_synth = session.run([self.w_latent_out], feed_dict=feed_dict_fid_synth)[0]
+                        w_latent_in_fid_synth = np.tile(w_latent_batch_fid_synth[:, :, np.newaxis], [1, 1, self.layers + 1])
+                        feed_dict_fid_synth = {self.w_latent_in: w_latent_in_fid_synth}
+                        synth_samples_fid = session.run([self.output_gen], feed_dict=feed_dict_fid_synth)[0]
+                        # -----------------------------------------------------------------
                         # debug -- trying to understand image gen using session.run and feed_dict
                         print(f'type(synth_samples_fid)={type(synth_samples_fid)}; synth_samples_fid.shape={synth_samples_fid.shape}')
                         print(f'samples generated with feed_dict={feed_dict}')

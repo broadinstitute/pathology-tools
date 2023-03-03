@@ -12,7 +12,7 @@ from models.evaluation.features import *
 parser = argparse.ArgumentParser(description='StylePathologyGAN fake image generator and feature extraction.')
 parser.add_argument('--checkpoint', dest='checkpoint', required= True, help='Path to pre-trained weights (.ckt) of PathologyGAN.')
 parser.add_argument('--training_dataset', dest='training_dataset', required=True, help='path to training (real) images')
-parser.add_argument('--training_features_path', dest='training_features', required=True, help='output path for features hdf5 for real samples')
+parser.add_argument('--training_features_path', dest='training_features_path', required=True, help='output path for features hdf5 for real samples')
 parser.add_argument('--num_samples', dest='num_samples', required= True, type=int, default=5000, help='Number of images to generate.')
 parser.add_argument('--dataset', dest='dataset', type=str, help='Dataset/directory name for he slide h5 dataset')
 parser.add_argument('--batch_size', dest='batch_size', required= True, type=int, default=50, help='Batch size.')

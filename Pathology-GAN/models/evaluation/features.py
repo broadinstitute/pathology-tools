@@ -5,6 +5,7 @@ import h5py
 import random
 import shutil
 # import tensorflow.contrib.gan as tfgan
+import tensorflow_gan as tfgan
 from models.generative.utils import *
 from data_manipulation.utils import *
 # for saving latent representations of generated images

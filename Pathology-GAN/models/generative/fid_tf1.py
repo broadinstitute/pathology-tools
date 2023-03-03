@@ -24,7 +24,7 @@ else:
     import tensorflow_gan as tfgan
 session = tf.compat.v1.InteractiveSession()
 # A smaller BATCH_SIZE reduces GPU memory usage, but at the cost of a slight slowdown
-BATCH_SIZE = 4 #64
+BATCH_SIZE = 64
 
 # Run images through Inception.
 inception_images = tf.compat.v1.placeholder(tf.float32, [None, 3, None, None])

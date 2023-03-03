@@ -11,6 +11,7 @@ from models.evaluation.features import *
 
 parser = argparse.ArgumentParser(description='StylePathologyGAN fake image generator and feature extraction.')
 parser.add_argument('--checkpoint', dest='checkpoint', required= True, help='Path to pre-trained weights (.ckt) of PathologyGAN.')
+parser.add_argument('--training_dataset', dest='training_dataset', required=True, help='path to training (real) images')
 parser.add_argument('--num_samples', dest='num_samples', required= True, type=int, default=5000, help='Number of images to generate.')
 parser.add_argument('--dataset', dest='dataset', type=str, help='Dataset/directory name for he slide h5 dataset')
 parser.add_argument('--batch_size', dest='batch_size', required= True, type=int, default=50, help='Batch size.')
@@ -28,16 +29,18 @@ main_path = os.path.dirname(os.path.realpath(__file__))
 dbs_path = os.path.dirname(os.path.realpath(__file__))
 
 # Real Image conv and CRImage features.
-nki_vgh_new_train = '%s/evaluation/real/nki_vgh/he/new/h224_w224_n3//hdf5_nki_vgh_he_features_train_real.h5' % main_path
+# nki_vgh_new_train = '%s/evaluation/real/nki_vgh/he/new/h224_w224_n3//hdf5_nki_vgh_he_features_train_real.h5' % main_path
+# Sorting out paths -- it should be such that we give the real images as input
+nki_vgh_new_train = args.training_dataset
 nki_vgh_new_test = '%s/evaluation/real/nki_vgh/he/new/h224_w224_n3/hdf5_nki_vgh_he_features_test_real.h5' % main_path
-nki_vgh_new_train_cr = '%s/evaluation/real/nki_vgh/he/new/h224_w224_n3//crimage_train.txt' % main_path
-nki_vgh_new_test_cr = '%s/evaluation/real/nki_vgh/he/new/h224_w224_n3/crimage_test.txt' % main_path
+# nki_vgh_new_train_cr = '%s/evaluation/real/nki_vgh/he/new/h224_w224_n3//crimage_train.txt' % main_path
+# nki_vgh_new_test_cr = '%s/evaluation/real/nki_vgh/he/new/h224_w224_n3/crimage_test.txt' % main_path
 
 print('Assuming the following files for the real images:')
 print('\t%s' % nki_vgh_new_train)
 print('\t%s' % nki_vgh_new_test)
-print('\t%s' % nki_vgh_new_train_cr)
-print('\t%s' % nki_vgh_new_test_cr)
+# print('\t%s' % nki_vgh_new_train_cr)
+# print('\t%s' % nki_vgh_new_test_cr)
 
 # Dataset information.
 crimage_path = os.path.join(main_path, 'CRImage')
@@ -84,12 +87,13 @@ with tf.Graph().as_default():
 with tf.Graph().as_default():
     hdf5s_features = inception_tf_feature_activations(hdf5s=[gen_hdf5_path], input_shape=data.training.shape[1:], batch_size=50)
 
-# Generate CRImage features from fake images. 
-main_evaluation_path = gen_hdf5_path.split('hdf5_')[0]
-crimage_file = os.path.join(main_evaluation_path, 'crimage_train.txt')
-if not os.path.isfile(crimage_file):
-	crimage_command = 'cd %s; Rscript --vanilla crimage_style.r %s %s' % (crimage_path, main_evaluation_path, num_samples)
-	os.system(crimage_command)
+# # ignoring CRImage while trying to get FID logic working
+# # Generate CRImage features from fake images.
+# main_evaluation_path = gen_hdf5_path.split('hdf5_')[0]
+# crimage_file = os.path.join(main_evaluation_path, 'crimage_train.txt')
+# if not os.path.isfile(crimage_file):
+# 	crimage_command = 'cd %s; Rscript --vanilla crimage_style.r %s %s' % (crimage_path, main_evaluation_path, num_samples)
+# 	os.system(crimage_command)
 
 print('----- INCEPTION FEATURES -----')
 print('Study on %s' % dataset)
@@ -106,11 +110,11 @@ with tf.Graph().as_default():
     scores = Scores(nki_vgh_new_test, hdf5s_features[0], 'Real Test', pathgan.model_name, k=1, display=True)
     scores.run_scores()
 
-print('----- CRIMAGE FEATURES -----')
-with tf.Graph().as_default():
-    scores = CRImage_Scores(ref1_crimage=nki_vgh_new_train_cr, ref2_crimage=crimage_file, name_x='Real Train', name_y=pathgan.model_name, k=1, GPU=True, display=True)
-    scores.run_crimage_scores()
-
-with tf.Graph().as_default():
-    scores = CRImage_Scores(ref1_crimage=nki_vgh_new_test_cr, ref2_crimage=crimage_file, name_x='Real Test', name_y=pathgan.model_name, k=1, GPU=True, display=True)
-    scores.run_crimage_scores()
+# print('----- CRIMAGE FEATURES -----')
+# with tf.Graph().as_default():
+#     scores = CRImage_Scores(ref1_crimage=nki_vgh_new_train_cr, ref2_crimage=crimage_file, name_x='Real Train', name_y=pathgan.model_name, k=1, GPU=True, display=True)
+#     scores.run_crimage_scores()
+#
+# with tf.Graph().as_default():
+#     scores = CRImage_Scores(ref1_crimage=nki_vgh_new_test_cr, ref2_crimage=crimage_file, name_x='Real Test', name_y=pathgan.model_name, k=1, GPU=True, display=True)
+#     scores.run_crimage_scores()

@@ -119,10 +119,8 @@ with tf.Graph().as_default():
     # scores = Scores(nki_vgh_new_train, hdf5s_features[0], 'Real Train', pathgan.model_name, k=1, display=True)
     # scores.run_scores()
     # debug
-    print(f'type(train_hdf5s_features) = {type(train_hdf5s_features)}')
-    print(f'train_hdf5s_features.shape = {train_hdf5s_features.shape}')
-    print(f'type(synth_hdf5s_features) = {type(synth_hdf5s_features)}')
-    print(f'synth_hdf5s_features.shape = {synth_hdf5s_features.shape}')
+    print(f'train_hdf5s_features = {train_hdf5s_features}')
+    print(f'synth_hdf5s_features = {synth_hdf5s_features}')
     scores = Scores(train_hdf5s_features[0], synth_hdf5s_features[0], 'Real Train', pathgan.model_name, k=1, display=True, FID_only=True)
     scores.run_fid()
 

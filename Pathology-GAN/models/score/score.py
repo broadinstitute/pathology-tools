@@ -1,5 +1,6 @@
 import tensorflow as tf
-import tensorflow.contrib.gan as tfgan #<-- not in tensorflow 1.15.5
+# import tensorflow.contrib.gan as tfgan #<-- not in tensorflow 1.15.5
+import tensorflow_gan as tfgan # <-- different package used by fid_tf1.py
 from data_manipulation.utils import *
 from models.score.utils import *
 from models.score.frechet_inception_distance import *

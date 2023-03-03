@@ -32,13 +32,13 @@ dbs_path = os.path.dirname(os.path.realpath(__file__))
 # nki_vgh_new_train = '%s/evaluation/real/nki_vgh/he/new/h224_w224_n3//hdf5_nki_vgh_he_features_train_real.h5' % main_path
 # Sorting out paths -- it should be such that we give the real images as input
 nki_vgh_new_train = args.training_dataset
-nki_vgh_new_test = '%s/evaluation/real/nki_vgh/he/new/h224_w224_n3/hdf5_nki_vgh_he_features_test_real.h5' % main_path
+# nki_vgh_new_test = '%s/evaluation/real/nki_vgh/he/new/h224_w224_n3/hdf5_nki_vgh_he_features_test_real.h5' % main_path
 # nki_vgh_new_train_cr = '%s/evaluation/real/nki_vgh/he/new/h224_w224_n3//crimage_train.txt' % main_path
 # nki_vgh_new_test_cr = '%s/evaluation/real/nki_vgh/he/new/h224_w224_n3/crimage_test.txt' % main_path
 
 print('Assuming the following files for the real images:')
 print('\t%s' % nki_vgh_new_train)
-print('\t%s' % nki_vgh_new_test)
+# print('\t%s' % nki_vgh_new_test)
 # print('\t%s' % nki_vgh_new_train_cr)
 # print('\t%s' % nki_vgh_new_test_cr)
 

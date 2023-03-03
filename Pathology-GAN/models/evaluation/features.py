@@ -67,8 +67,8 @@ def real_samples(data, data_output_path, num_samples=5000):
 
 
 # Extract Inception-V1 features from images in HDF5.
+# ** under tensorflow version 1.15 requires tensorflow_gan library (import tensorflow_gan as tfgan)
 def inception_tf_feature_activations(hdf5s, input_shape, batch_size):
-    # raise Exception("Cannot run this method under tf version 1.15.0 because there is no tf.contrib.gan module")
     images_input = tf.placeholder(dtype=tf.float32, shape=[None] + input_shape, name='images')
     images = 2 * images_input
     images -= 1
@@ -94,12 +94,17 @@ def inception_tf_feature_activations(hdf5s, input_shape, batch_size):
                     flag_images = True
                     storage_name = key.replace('images', 'features')
                     images_storage = hdf5_img_file[key]
+                    # debug
+                    print(f'images_storage.shape = {images_storage.shape}')
 
                     num_samples = images_storage.shape[0]
                     batches = int(num_samples / batch_size)
                     features_shape = (num_samples, 2048)
                     features_storage = hdf5_features_file.create_dataset(name=storage_name, shape=features_shape,
                                                                          dtype=np.float32)
+                    # debug
+                    print(f'generated hdf5 dataset with name = {storage_name}')
+                    print(f'features_storage = {features_storage}')
 
                     print('Starting features extraction...')
                     print('\tImage File:', hdf5_path)
@@ -110,6 +115,8 @@ def inception_tf_feature_activations(hdf5s, input_shape, batch_size):
                         if np.amax(batch_images) > 1.0:
                             batch_images = batch_images / 255.
                         activations = sess.run(out_incept_v3, {images_input: batch_images})
+                        # debug
+                        print(f'activations.shape = {activations.shape}')
                         features_storage[batch_num * batch_size:(batch_num + 1) * batch_size] = activations
                         ind += batch_size
                     print('\tFeature File:', hdf5_feature_path)

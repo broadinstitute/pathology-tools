@@ -17,6 +17,7 @@ import functools
 import numpy as np
 import time
 from tensorflow.python.ops import array_ops
+import pickle
 
 if float('.'.join(tf.__version__.split('.')[:2])) < 1.15:
     tfgan = tf.contrib.gan
@@ -68,7 +69,7 @@ def get_inception_activations(inps):
 def activations2distance(act1, act2):
     return session.run(fcd, feed_dict={activations1: act1, activations2: act2})
 
-def dataset_prep_from_numpy(images):
+def dataset_prep_from_numpy(images, save_path=None):
     """
     FID calculation requires images with pixels in [0, 255], and of shape (n_samples, 3, H, W)
     data preparation step meant to mimic the preparation that we use in evaluation_tools/evaluate.py
@@ -83,6 +84,10 @@ def dataset_prep_from_numpy(images):
     processed_images = np.reshape(processed_images, (len(processed_images), 3, 224, 224))
     # **NB: inception_activations must be executed because InceptionNet requires dimensions of 299,299,
     #       but dataset_prep() output images of dimension 224,224 before calling get_fid()
+    if save_path is not None:
+        with open(save_path, 'wb') as f:
+            pickle.dump(processed_images, f, protocol=pickle.HIGHEST_PROTOCOL)
+
     return processed_images
 
 def get_fid(images1, images2):

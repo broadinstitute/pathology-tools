@@ -212,7 +212,8 @@ class PathologyGAN(GAN):
             if real_samples_fid is not None:
                 # debug
                 print(f'real_samples_fid.shape={real_samples_fid.shape}')
-                real_samples_fid = dataset_prep_from_numpy(real_samples_fid)
+                real_samples_fid = dataset_prep_from_numpy(real_samples_fid,
+                    save_path=os.path.join(data_out_path, 'images/training_FID_samples.pkl'))
             minimum_fid = 1000000
 
             # Epoch Iteration.
@@ -257,7 +258,8 @@ class PathologyGAN(GAN):
                     feed_dict_fid_synth = {self.w_latent_in: w_latent_in_fid_synth}
                     synth_samples_fid = session.run([self.output_gen], feed_dict=feed_dict_fid_synth)[0]
                     print(f'synth_samples_fid.shape={synth_samples_fid.shape}')
-                    synth_samples_fid = dataset_prep_from_numpy(synth_samples_fid)
+                    synth_samples_fid = dataset_prep_from_numpy(synth_samples_fid,
+                        save_path=os.path.join(data_out_path, 'images/synth_FID_samples_epoch_%s.pkl' % epoch))
                     fid = get_fid(synth_samples_fid, real_samples_fid)
                     # log FID
                     update_csv(model=self, file=csvs[-1], variables=[fid], epoch=epoch, iteration=run_epochs,
@@ -266,8 +268,7 @@ class PathologyGAN(GAN):
                         # debug
                         print(f'previous min FID of {minimum_fid} beaten by new minimum of {fid}')
                         minimum_fid = fid
-                        # TODO: right way of doing this string manipulation to store checkpoints with epoch suffixes?
-                        saver.save(sess=session, save_path=checkpoints_fid[:-4]+'_epoch'+str(epoch)+'.ckt')
+                        saver.save(sess=session, save_path=checkpoints_fid[:-4]+'_epoch_%s.ckt' % epoch)
                 # ================================
 
                 data.training.reset()

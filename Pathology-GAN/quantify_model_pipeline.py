@@ -97,18 +97,20 @@ with tf.Graph().as_default():
 
 print('----- INCEPTION FEATURES -----')
 print('Study on %s' % dataset)
-with tf.Graph().as_default():
-    scores = Scores(nki_vgh_new_train, nki_vgh_new_test, 'Real Train VGH_NKI', 'Real Test VGH_NKI', k=1, display=False)
-    scores.run_scores()
-    scores.report_scores()
+# with tf.Graph().as_default():
+#     scores = Scores(nki_vgh_new_train, nki_vgh_new_test, 'Real Train VGH_NKI', 'Real Test VGH_NKI', k=1, display=False)
+#     scores.run_scores()
+#     scores.report_scores()
 
+# Want to just execute the FID logic first
 with tf.Graph().as_default():
     scores = Scores(nki_vgh_new_train, hdf5s_features[0], 'Real Train', pathgan.model_name, k=1, display=True)
-    scores.run_scores()
+    scores.run_fid()
+    # scores.run_scores()
 
-with tf.Graph().as_default():
-    scores = Scores(nki_vgh_new_test, hdf5s_features[0], 'Real Test', pathgan.model_name, k=1, display=True)
-    scores.run_scores()
+# with tf.Graph().as_default():
+#     scores = Scores(nki_vgh_new_test, hdf5s_features[0], 'Real Test', pathgan.model_name, k=1, display=True)
+#     scores.run_scores()
 
 # print('----- CRIMAGE FEATURES -----')
 # with tf.Graph().as_default():

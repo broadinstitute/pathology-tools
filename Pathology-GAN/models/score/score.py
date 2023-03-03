@@ -12,7 +12,7 @@ from models.score.mode_score import *
 
 
 class Scores(object):
-	def __init__(self, hdf5_features_x, hdf5_features_y, name_x, name_y, k=1, GPU=False, display=False):
+	def __init__(self, hdf5_features_x, hdf5_features_y, name_x, name_y, k=1, GPU=False, display=False, FID_only=False):
 		super(Scores, self).__init__()
 		self.hdf5_features_x_path = hdf5_features_x
 		self.hdf5_features_y_path = hdf5_features_y
@@ -43,7 +43,10 @@ class Scores(object):
 			print('Loded HDF5 Files')
 			print(self.name_x, 'Shape:', self.features_x.shape)
 			print(self.name_y, 'Shape:', self.features_y.shape)
-		self.build_graph()
+		if FID_only:
+			self.build_graph_fid()
+		else:
+			self.build_graph()
 		if self.display:
 			print('Created Graph.')
 
@@ -61,6 +64,10 @@ class Scores(object):
 		self.mmd_output = maximmum_mean_discrepancy_score(self.x_input, self.y_input)
 		self.indices_output, self.labels_output = k_nearest_neighbor_tf_part(self.x_input, self.y_input, k=self.k)
 
+	# fid-specific prep method
+	def build_graph_fid(self):
+		self.fid_output = tfgan.eval.frechet_classifier_distance_from_activations(self.x_input, self.y_input)
+
 	def run_mmd(self):
 		with tf.Session(config=self.config) as sess:
 			sess.run(tf.global_variables_initializer())
@@ -73,6 +80,16 @@ class Scores(object):
 			feed_dict = {self.x_input:self.features_x, self.y_input:self.features_y}
 			self.fid, self.kid, self.mmd, self.indices, self.labels = sess.run([self.fid_output, self.kid_output, self.mmd_output, self.indices_output, self.labels_output], feed_dict)
 			self.knn_x, self.knn_y,self.knn = k_nearest_neighbor_np_part(self.indices, self.labels, k=self.k, x_samples=self.features_x.shape[0])
+		if self.display:
+			self.report_scores()
+			print()
+
+	# function to just execute FID score
+	def run_fid(self):
+		with tf.Session(config=self.config) as sess:
+			sess.run(tf.global_variables_initializer())
+			feed_dict = {self.x_input:self.features_x, self.y_input:self.features_y}
+			self.fid = sess.run([self.fid_output], feed_dict)
 		if self.display:
 			self.report_scores()
 			print()

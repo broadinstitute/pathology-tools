@@ -12,6 +12,7 @@ from models.evaluation.features import *
 parser = argparse.ArgumentParser(description='StylePathologyGAN fake image generator and feature extraction.')
 parser.add_argument('--checkpoint', dest='checkpoint', required= True, help='Path to pre-trained weights (.ckt) of PathologyGAN.')
 parser.add_argument('--num_samples', dest='num_samples', required= True, type=int, default=5000, help='Number of images to generate.')
+parser.add_argument('--dataset', dest='dataset', type=str, help='Dataset/directory name for he slide h5 dataset')
 parser.add_argument('--batch_size', dest='batch_size', required= True, type=int, default=50, help='Batch size.')
 parser.add_argument('--z_dim', dest='z_dim', required= True, type=int, default=200, help='Latent space size.')
 parser.add_argument('--model', dest='model', type=str, default='PathologyGAN', help='Model name.')
@@ -45,7 +46,7 @@ data_out_path = os.path.join(data_out_path, model)
 image_width = 224
 image_height = 224
 image_channels = 3
-dataset='vgh_nki'
+dataset= args.dataset #'vgh_nki'
 marker='he'
 name_run = 'h%s_w%s_n%s' % (image_height, image_width, image_channels)
 data_out_path = '%s/%s' % (data_out_path, name_run)
@@ -91,7 +92,7 @@ if not os.path.isfile(crimage_file):
 	os.system(crimage_command)
 
 print('----- INCEPTION FEATURES -----')
-print('Study on VGH_NKI')
+print('Study on %s' % dataset)
 with tf.Graph().as_default():
     scores = Scores(nki_vgh_new_train, nki_vgh_new_test, 'Real Train VGH_NKI', 'Real Test VGH_NKI', k=1, display=False)
     scores.run_scores()

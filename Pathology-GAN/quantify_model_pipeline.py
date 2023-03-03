@@ -12,6 +12,7 @@ from models.evaluation.features import *
 parser = argparse.ArgumentParser(description='StylePathologyGAN fake image generator and feature extraction.')
 parser.add_argument('--checkpoint', dest='checkpoint', required= True, help='Path to pre-trained weights (.ckt) of PathologyGAN.')
 parser.add_argument('--training_dataset', dest='training_dataset', required=True, help='path to training (real) images')
+parser.add_argument('--training_features_path', dest='training_features', required=True, help='output path for features hdf5 for real samples')
 parser.add_argument('--num_samples', dest='num_samples', required= True, type=int, default=5000, help='Number of images to generate.')
 parser.add_argument('--dataset', dest='dataset', type=str, help='Dataset/directory name for he slide h5 dataset')
 parser.add_argument('--batch_size', dest='batch_size', required= True, type=int, default=50, help='Batch size.')
@@ -31,16 +32,20 @@ dbs_path = os.path.dirname(os.path.realpath(__file__))
 # Real Image conv and CRImage features.
 # nki_vgh_new_train = '%s/evaluation/real/nki_vgh/he/new/h224_w224_n3//hdf5_nki_vgh_he_features_train_real.h5' % main_path
 # Sorting out paths -- it should be such that we give the real images as input
-nki_vgh_new_train = args.training_dataset
 # nki_vgh_new_test = '%s/evaluation/real/nki_vgh/he/new/h224_w224_n3/hdf5_nki_vgh_he_features_test_real.h5' % main_path
 # nki_vgh_new_train_cr = '%s/evaluation/real/nki_vgh/he/new/h224_w224_n3//crimage_train.txt' % main_path
 # nki_vgh_new_test_cr = '%s/evaluation/real/nki_vgh/he/new/h224_w224_n3/crimage_test.txt' % main_path
 
-print('Assuming the following files for the real images:')
-print('\t%s' % nki_vgh_new_train)
+# print('Assuming the following files for the real images:')
+# print('\t%s' % nki_vgh_new_train)
 # print('\t%s' % nki_vgh_new_test)
 # print('\t%s' % nki_vgh_new_train_cr)
 # print('\t%s' % nki_vgh_new_test_cr)
+
+training_dataset = args.training_dataset
+training_features_path = args.training_features_path
+print(f'TRAINING DATASET PATH: {training_dataset}')
+print(f'TRAINING FEATURES OUTPUT PATH: {training_features_path}')
 
 # Dataset information.
 crimage_path = os.path.join(main_path, 'CRImage')
@@ -85,7 +90,14 @@ with tf.Graph().as_default():
 
 # Generate Inception features from fake images.
 with tf.Graph().as_default():
-    hdf5s_features = inception_tf_feature_activations(hdf5s=[gen_hdf5_path], input_shape=data.training.shape[1:], batch_size=50)
+    # hdf5s_features = inception_tf_feature_activations(hdf5s=[gen_hdf5_path], input_shape=data.training.shape[1:], batch_size=50)
+    # dont we also need to calculate the inception activations for the training images and the synthetic images?
+    synth_hdf5s_features = inception_tf_feature_activations(hdf5s=[gen_hdf5_path], input_shape=data.training.shape[1:], batch_size=50)
+    # check for training image hdf5
+    if not os.path.isfile(training_features_path):
+        # features.py method to create a subset of training hdf5 dataset (written to training_features_path)
+        generate_hdf_subset(training_dataset, training_features_path, n_samples=num_samples)
+    train_hdf5s_features = inception_tf_feature_activations(hdf5s=[training_features_path], input_shape=data.training.shape[1:], batch_size=50)
 
 # # ignoring CRImage while trying to get FID logic working
 # # Generate CRImage features from fake images.
@@ -104,9 +116,10 @@ print('Study on %s' % dataset)
 
 # Want to just execute the FID logic first
 with tf.Graph().as_default():
-    scores = Scores(nki_vgh_new_train, hdf5s_features[0], 'Real Train', pathgan.model_name, k=1, display=True)
-    scores.run_fid()
+    # scores = Scores(nki_vgh_new_train, hdf5s_features[0], 'Real Train', pathgan.model_name, k=1, display=True)
     # scores.run_scores()
+    scores = Scores(train_hdf5s_features, synth_hdf5s_features, 'Real Train', pathgan.model_name, k=1, display=True, FID_only=True)
+    scores.run_fid()
 
 # with tf.Graph().as_default():
 #     scores = Scores(nki_vgh_new_test, hdf5s_features[0], 'Real Test', pathgan.model_name, k=1, display=True)

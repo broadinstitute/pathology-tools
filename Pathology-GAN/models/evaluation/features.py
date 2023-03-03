@@ -289,6 +289,21 @@ def generate_samples_from_checkpoint(model, data, data_out_path, checkpoint, num
 
     return hdf5_path
 
+# Take specfied-size subset of hdf5 image dataset
+def generate_hdf_subset(input_dataset, output_path, n_samples):
+    # intended use: take an n_samples subset of the training image set to
+    # be used for FID calculation
+    img_dataset = h5py.File(input_dataset, 'r')
+    # debug
+    print(f'real dataset hdf5 read in : {img_dataset}')
+    random_elts = np.random.permutation(len(img_dataset['images']))[:n_samples]
+    random_elts.sort()
+    img_subset = img_dataset['images'][random_elts]
+    print(f'subset of real images taken - of shape : {img_subset.shape}')
+    hdf5_file = h5py.File(output_path, mode='w')
+    img_storage = hdf5_file.create_dataset(name='images', shape=img_subset.shape, dtype=np.float32)
+    print(f'img_subset written to {output_path}')
+
 
 # Generate and encode samples from PathologyGAN, with an encoder.
 def generate_encode_samples_from_checkpoint(model, data, data_out_path, checkpoint, num_samples=5000, batches=50):

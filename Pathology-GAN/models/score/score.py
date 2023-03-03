@@ -36,8 +36,12 @@ class Scores(object):
 			self.config = tf.ConfigProto()
 		else:
 			self.config = tf.ConfigProto(device_count = {'GPU': 0})
-			
-		self.read_hdfs()
+
+		# just interacting with the FID-specific hdf5 files
+		if FID_only:
+			self.read_features_hdfs()
+		else:
+			self.read_hdfs()
 		if self.display:
 			print('Running:', self.title)
 			print('Loded HDF5 Files')
@@ -56,6 +60,11 @@ class Scores(object):
 		self.images_x = read_hdf5(self.hdf5_images_x_path, 'images')
 		self.images_y = read_hdf5(self.hdf5_images_y_path, 'images')
 
+	# just want to read the _features hdf5s for fid
+	def read_features_hdfs(self):
+		self.features_x = read_hdf5(self.hdf5_features_x_path, 'features')
+		self.features_y = read_hdf5(self.hdf5_features_y_path, 'features')
+
 	def build_graph(self):
 		self.x_input = tf.placeholder(dtype=tf.float32, shape=(None, self.features_x.shape[-1]), name='x_features')
 		self.y_input = tf.placeholder(dtype=tf.float32, shape=(None, self.features_y.shape[-1]), name='y_features')
@@ -66,6 +75,8 @@ class Scores(object):
 
 	# fid-specific prep method
 	def build_graph_fid(self):
+		self.x_input = tf.placeholder(dtype=tf.float32, shape=(None, self.features_x.shape[-1]), name='x_features')
+		self.y_input = tf.placeholder(dtype=tf.float32, shape=(None, self.features_y.shape[-1]), name='y_features')
 		self.fid_output = tfgan.eval.frechet_classifier_distance_from_activations(self.x_input, self.y_input)
 
 	def run_mmd(self):

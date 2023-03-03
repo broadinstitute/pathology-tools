@@ -211,5 +211,8 @@ def write_sprite_image(data, filename=None, metadata=True, row_n=None):
 
 def read_hdf5(path, dic):
     hdf5_file = h5py.File(path, 'r')
+    # debug
+    print(f'read_hdf5 called with parameters\npath:{path}\ndic:{dic}')
+    print(f'hdf5_file.keys() = {hdf5_file.keys()}')
     return hdf5_file[dic]
 

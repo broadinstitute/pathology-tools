@@ -104,6 +104,8 @@ class Scores(object):
 		if self.display:
 			self.report_scores()
 			print()
+		# returning the value for tracking during training
+		return self.fid
 
 	def report_scores(self):
 		print()

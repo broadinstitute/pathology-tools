@@ -219,7 +219,9 @@ class PathologyGAN(GAN):
             # Epoch Iteration.
             for epoch in range(1, epochs+1):
                 print(f'STARTING EPOCH {epoch}')
-                saver.save(sess=session, save_path=checkpoints)
+                # saver.save(sess=session, save_path=checkpoints)
+                # # saving per-epoch checkpoints
+                saver.save(sess=session, save_path=checkpoints[:-4] + '_epoch_%s.ckt' % epoch)
 
                 # Batch Iteration.
                 for batch_images, batch_labels in tqdm(data.training):

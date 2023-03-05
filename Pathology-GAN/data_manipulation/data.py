@@ -28,11 +28,15 @@ class Data:
         self.batch_size = batch_size
 
         # Train dataset
-        self.hdf5_train = os.path.join(self.pathes_path, 'hdf5_%s_train.h5' % self.dataset_name)
+        # # if an hdf5 file is given as the dataset input, use that path directly
+        if dataset[-3:] == '.h5':
+            self.hdf5_train = dataset
+        else:
+            self.hdf5_train = os.path.join(self.pathes_path, 'hdf5_%s_train.h5' % self.dataset_name)
         print(f'data.hdf5_train = {self.hdf5_train}')
         self.training = None
         if os.path.isfile(self.hdf5_train):
-            print('SETTING DATA.TRAINING ATTRIBUTE')
+            print(f'SETTING DATA.TRAINING ATTRIBUTE TO {self.hdf5_train}')
             if use_generator_dataset:
                 self.training = Generator_Dataset(dataset)
             else:

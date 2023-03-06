@@ -118,7 +118,8 @@ class BLCA_CL_Dataset(object):
         img = slide.read_region(tuple(patch_coords), 0, tuple([256, 256])).convert('RGB')
         if self.return_PIL_format:
             if self.resize_dim is not None:
-                img = img.resize((resize_dim, resize_dim), Image.ANTIALIAS)
+                # img = img.resize((resize_dim, resize_dim), Image.ANTIALIAS)
+                img = cv2.resize((resize_dim, resize_dim), cv2.INTER_LINEAR)
             return np.array(img)
 
     def filter_green(self, img, stain_color_map, img_size=488):

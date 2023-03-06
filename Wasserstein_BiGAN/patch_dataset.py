@@ -21,7 +21,7 @@ import argparse
 
 
 class BLCA_CL_Dataset(object):
-    def __init__(self, path, mode='Train', train_prop=0.8, transform=None, return_PIL=False, resize_dim=None,
+    def __init__(self, path, mode='Train', train_prop=1.0, transform=None, return_PIL=False, resize_dim=None,
                  shuffle=False, stain_color_map=None):
         self.root = path
         self.data_transformation = transform
@@ -207,7 +207,7 @@ if __name__ == '__main__':
     parser.add_argument('--output_prefix', type=str, help='Output prefix for training .h5 dataset file')
     parser.add_argument('--train_proportion', type=float, default=1.0, help='Proportion of data to use for training'
                                                                             ' set in rain/test split')
-    parser.add_argument('--img_dim', type=int, default=448, help='Dimension (side-length) for output images')
+    parser.add_argument('--img_dim', type=int, default=224, help='Dimension (side-length) for output images')
     parser.add_argument('--max_dataset_size', type=int, help='Maximum number of samples to include in .h5 dataset')
     parser.add_argument('--shuffle', type=bool, default=False, help='Boolean indicating whether or not to shuffle the '
                                                                     'hdf5 files being used to build the dataset')

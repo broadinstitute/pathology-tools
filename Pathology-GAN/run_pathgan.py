@@ -13,7 +13,7 @@ parser.add_argument('--checkpoint', dest='checkpoint', required=False, help='Pat
 parser.add_argument('--main_path', dest='main_path', required=True, help='Main path for output data')
 parser.add_argument('--dataset', dest='dataset', type=str, help='Dataset/directory name for he slide h5 dataset')
 parser.add_argument('--input_img_dim', dest='input_img_dim', type=int, default=224, help='Dimension of input images (used for network instantiation)')
-parser.add_argument('--monitor_FID', action='store_true', help='Bool flag to trigger FID monitering during training')
+# parser.add_argument('--monitor_FID', action='store_true', help='Bool flag to trigger FID monitering during training')
 # parser.add_argument('--generator_dataset', dest='use_generator', type=bool,
 #                     default=False, help='Flag for using alternate dataset object')
 args = parser.parse_args()
@@ -25,7 +25,8 @@ model = args.model
 checkpoint = args.checkpoint
 input_img_dim = args.input_img_dim
 # extra metrics to monitor during training
-track_FID = args.monitor_FID
+# TODO: need to debug the image processing from training method to FID calculation step
+track_FID = False #args.monitor_FID
 
 # requiring main_path be taken as input; feels dangerous to formulate it automatically (i.e., higher risk of collision?)
 main_path = args.main_path #os.path.dirname(os.path.realpath(__file__))

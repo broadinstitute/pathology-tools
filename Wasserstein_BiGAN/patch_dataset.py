@@ -21,9 +21,14 @@ import argparse
 
 
 class BLCA_CL_Dataset(object):
-    def __init__(self, path, mode='Train', train_prop=1.0, transform=None, return_PIL=False, resize_dim=None,
+    def __init__(self, path, source_svs_dir, mode='Train', train_prop=1.0, transform=None, return_PIL=False, resize_dim=None,
                  shuffle=False, stain_color_map=None):
         self.root = path
+        # taking the svs directory as input rather than requiring us to copy all the svs files in to the patch directory
+        self.source_svs_dir = source_svs_dir
+        # better way to do this; temporary way to standardize path
+        if self.source_svs_dir[-1] != '/':
+            self.source_svs_dir += '/'
         self.data_transformation = transform
         # Flag for returning images in (width, height, channel) shape with pixels
         # in 0-255 --> this is what you get from casting a PIL image to a numpy array, and its
@@ -80,7 +85,9 @@ class BLCA_CL_Dataset(object):
     def __getitem__(self, idx):
         transform = self.data_transformation
         current_patch = self.coords_all[idx]
-        slide = openslide.OpenSlide(self.root + current_patch[0][:-3] + '.svs')
+        # slide = openslide.OpenSlide(self.root + current_patch[0][:-3] + '.svs')
+        # --> getting svs from source directory given as input
+        slide = openslide.OpenSlide(self.source_svs_dir + current_patch[0][:-3] + '.svs')
         img = slide.read_region(tuple(current_patch[1]), current_patch[2],
                                 tuple([current_patch[3], current_patch[3]])).convert('RGB')
         # if we want images in the format required by PathologyGAN, we just cast the PIL RGB images to numpy arrays
@@ -146,7 +153,7 @@ class BLCA_CL_Dataset(object):
         return len(self.coords_all)
 
 
-def construct_hdf5_datasets(input_patches_dir, output_prefix, train_prop=1.0, img_dim=224, max_dataset_size=None,
+def construct_hdf5_datasets(input_patches_dir, source_svs_dir, output_prefix, train_prop=1.0, img_dim=224, max_dataset_size=None,
                             shuffle=False, stain_color_map=None):
     # function to create hdf5 files containing training and testing image datasets
     # -> Intended to create datasets files in format required by PathologyGAN training procedure
@@ -154,7 +161,7 @@ def construct_hdf5_datasets(input_patches_dir, output_prefix, train_prop=1.0, im
     print(f'construct_hdf5_dataset() called with filter_green={filter_green}')
 
     # generate dataset objects that return numpy array images in the format and size required by PathologyGAN
-    train_dataset = BLCA_CL_Dataset(input_patches_dir, train_prop=train_prop,
+    train_dataset = BLCA_CL_Dataset(input_patches_dir, source_svs_dir, train_prop=train_prop,
                                     mode='Train', return_PIL=True, resize_dim=img_dim, shuffle=shuffle,
                                     stain_color_map=stain_color_map)
 
@@ -204,6 +211,7 @@ if __name__ == '__main__':
                                                  'for generating .h5 dataset files for use by PathologyGAN')
     parser.add_argument('--input_patches_dir', type=str, help='Directory containing CLAM-generated patch files (h5s and'
                                                               'svs files')
+    parser.add_argument('--source_svs_dir', type=str, help='Directory containing source .svs files')
     parser.add_argument('--output_prefix', type=str, help='Output prefix for training .h5 dataset file')
     parser.add_argument('--train_proportion', type=float, default=1.0, help='Proportion of data to use for training'
                                                                             ' set in rain/test split')
@@ -220,7 +228,8 @@ if __name__ == '__main__':
 
     # --- setting the main method to generate hdf5 datasets in format for pathology-gan training ---
     # example output prefix: '/workdir/crohlice/scripts/PurityGAN/Pathology-GAN/dataset/tcga/he/patches_h448_w448/TESTLARGE_hdf5_tcga_he',
-    construct_hdf5_datasets(input_patches_dir=args.input_patches_dir, output_prefix=args.output_prefix,
+    construct_hdf5_datasets(input_patches_dir=args.input_patches_dir, source_svs_dir=args.source_svs_dir,
+                            output_prefix=args.output_prefix,
                             train_prop=args.train_proportion,
                             img_dim=args.img_dim, max_dataset_size=args.max_dataset_size, shuffle=args.shuffle,
                             stain_color_map=green_filter_cmap)

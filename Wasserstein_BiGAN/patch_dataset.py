@@ -84,6 +84,8 @@ class BLCA_CL_Dataset(object):
 
                 # shuffling this list optionally to draw randomly from slide and position
                 if shuffle:
+                    # debug
+                    print('shuffling coordinate list')
                     random.shuffle(self.coords_all)
 
     def __getitem__(self, idx):
@@ -222,8 +224,8 @@ if __name__ == '__main__':
                                                                             ' set in rain/test split')
     parser.add_argument('--img_dim', type=int, default=224, help='Dimension (side-length) for output images')
     parser.add_argument('--max_dataset_size', type=int, help='Maximum number of samples to include in .h5 dataset')
-    parser.add_argument('--shuffle', type=bool, default=False, help='Boolean indicating whether or not to shuffle the '
-                                                                    'hdf5 files being used to build the dataset')
+    parser.add_argument('--shuffle', action='store_true', help='Boolean indicating whether or not to shuffle the '
+                                                               'hdf5 files being used to build the dataset')
     args = parser.parse_args()
 
     # defining the stain color map used in the green filtering step

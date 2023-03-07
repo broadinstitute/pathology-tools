@@ -82,11 +82,11 @@ class BLCA_CL_Dataset(object):
                 for k in data:
                     self.coords_all.append([j, k, patch_level, patch_size])
 
-                # shuffling this list optionally to draw randomly from slide and position
-                if shuffle:
-                    # debug
-                    print('shuffling coordinate list')
-                    random.shuffle(self.coords_all)
+        # shuffling this list optionally to draw randomly from slide and position
+        if shuffle:
+            # debug
+            print('shuffling coordinate list')
+            random.shuffle(self.coords_all)
 
     def __getitem__(self, idx):
         transform = self.data_transformation

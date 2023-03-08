@@ -4,7 +4,7 @@ from data_manipulation.dataset import Dataset, Generator_Dataset
 
 class Data:
     def __init__(self, dataset, marker, patch_h, patch_w, n_channels, batch_size, project_path=os.getcwd(),
-                 thresholds=(), labels=False, empty=False, use_generator_dataset=False):
+                 thresholds=(), labels=False, empty=False, use_generator_dataset=False, validation=False, test=False):
         # Adding the `use_generator_dataset` flag to trigger the alternate dataset class that uses a tensorflow
         # generator object to more efficiently open/traverse the hdf5 dataset file
 
@@ -44,15 +44,17 @@ class Data:
                 self.training = Dataset(self.hdf5_train, patch_h, patch_w, n_channels, batch_size=batch_size, thresholds=thresholds, labels=labels, empty=empty)
         else:
             print(f'os.path.isfile(self.hdf5_train) == False')
-        
+
         # Validation dataset, some datasets work with those.
-        self.hdf5_validation = os.path.join(self.pathes_path, 'hdf5_%s_validation.h5' % self.dataset_name)
-        self.validation = None
-        if os.path.isfile(self.hdf5_validation):
-            self.validation = Dataset(self.hdf5_validation, patch_h, patch_w, n_channels, batch_size=batch_size, thresholds=thresholds, labels=labels, empty=empty)
+        if validation:
+            self.hdf5_validation = os.path.join(self.pathes_path, 'hdf5_%s_validation.h5' % self.dataset_name)
+            self.validation = None
+            if os.path.isfile(self.hdf5_validation):
+                self.validation = Dataset(self.hdf5_validation, patch_h, patch_w, n_channels, batch_size=batch_size, thresholds=thresholds, labels=labels, empty=empty)
 
         # Test dataset
-        self.hdf5_test = os.path.join(self.pathes_path, 'hdf5_%s_test.h5' % self.dataset_name)
-        self.test = None
-        if os.path.isfile(self.hdf5_test):
-            self.test = Dataset(self.hdf5_test, patch_h, patch_w, n_channels, batch_size=batch_size, thresholds=thresholds, labels=labels, empty=empty)
+        if test:
+            self.hdf5_test = os.path.join(self.pathes_path, 'hdf5_%s_test.h5' % self.dataset_name)
+            self.test = None
+            if os.path.isfile(self.hdf5_test):
+                self.test = Dataset(self.hdf5_test, patch_h, patch_w, n_channels, batch_size=batch_size, thresholds=thresholds, labels=labels, empty=empty)

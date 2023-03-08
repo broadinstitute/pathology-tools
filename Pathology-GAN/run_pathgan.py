@@ -65,7 +65,10 @@ loss_type = 'relativistic gradient penalty'
 
 # setting labels flag to False if we give 'tcga' as our dataset (because those don't have labels)
 data = Data(dataset=dataset, marker=marker, patch_h=image_height, patch_w=image_width, n_channels=image_channels,
-            batch_size=batch_size, project_path=dbs_path, labels=(dataset == 'vgh_nki'), use_generator_dataset=use_generator)
+            batch_size=batch_size, project_path=dbs_path, labels=(dataset == 'vgh_nki'), use_generator_dataset=use_generator,
+            # optionally set to True if there are matching {path}_validation.h5, {path}_test.h5 datasets
+            # to go along with the {path}_train.h5 training dataset
+            validation=False, test=False)
 
 with tf.Graph().as_default():
     pathgan = PathologyGAN(data=data, z_dim=z_dim, layers=layers, use_bn=use_bn, alpha=alpha, beta_1=beta_1,

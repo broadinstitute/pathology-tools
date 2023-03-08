@@ -11,7 +11,7 @@ parser.add_argument('--batch_size', dest='batch_size', type=int, default=64, hel
 parser.add_argument('--model', dest='model', type=str, default='PathologyGAN', help='Model name.')
 parser.add_argument('--checkpoint', dest='checkpoint', required=False, help='Path to pre-trained weights (.ckt) of PathologyGAN.')
 parser.add_argument('--main_path', dest='main_path', required=True, help='Main path for output data')
-parser.add_argument('--dataset', dest='dataset', type=str, help='Dataset/directory name for he slide h5 dataset')
+parser.add_argument('--dataset', dest='dataset', type=str, help='Dataset name or path name for he slide h5 dataset')
 parser.add_argument('--input_img_dim', dest='input_img_dim', type=int, default=224, help='Dimension of input images (used for network instantiation)')
 # parser.add_argument('--monitor_FID', action='store_true', help='Bool flag to trigger FID monitering during training')
 # parser.add_argument('--generator_dataset', dest='use_generator', type=bool,
@@ -38,7 +38,7 @@ data_out_path = os.path.join(data_out_path, model)
 image_width = input_img_dim  #448
 image_height = input_img_dim  #448
 image_channels = 3
-dataset = args.dataset #'tcga' #'vgh_nki'
+dataset = args.dataset #'tcga', 'vgh_nki', or '{dataset_dir}/{filename}.h5'
 # TODO: remove use of use_generator (or implement it), currently not being used
 use_generator = False# args.generator_dataset
 marker = 'he'

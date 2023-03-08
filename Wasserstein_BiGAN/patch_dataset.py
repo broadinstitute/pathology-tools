@@ -46,7 +46,7 @@ class BLCA_CL_Dataset(object):
         h5s = [x for x in files if '.h5' in x]  # <- whole-slide images
         # *OPTIONAL* Shuffling the list of patients before splitting on patient -- contents of the two splits
         # determined by the seed and the split proportion
-        random.seed(4)
+        # random.seed(4)
         if shuffle:
             random.shuffle(h5s)
         print(f'h5s = {h5s}')

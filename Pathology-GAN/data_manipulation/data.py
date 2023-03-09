@@ -15,7 +15,6 @@ class Data:
         if dataset[-3:] == '.h5':
             self.hdf5_train = dataset
         else:
-            print(f'data.hdf5_train = {self.hdf5_train}')
             self.dataset = dataset
             self.marker = marker
             self.dataset_name = '%s_%s' % (self.dataset, self.marker)

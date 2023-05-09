@@ -21,7 +21,7 @@ import argparse
 
 
 class BLCA_CL_Dataset(object):
-    def __init__(self, path, source_svs_dir, mode='Train', train_prop=1.0, transform=None, return_PIL=False, resize_dim=None,
+    def __init__(self, path, source_svs_dir, data_log, mode='Train', train_prop=1.0, transform=None, return_PIL=False, resize_dim=None,
                  shuffle=False, stain_color_map=None):
         self.root = path
         # taking the svs directory as input rather than requiring us to copy all the svs files in to the patch directory
@@ -41,6 +41,9 @@ class BLCA_CL_Dataset(object):
         # boolean flag for whether or not call into green filtering method
         self.identify_green = self.stain_color_map is not None
         print(f'Dataset attribute self.identify_green = {self.identify_green}')
+        # including output file storing each patch's source slide and coords
+        self.data_log = open(data_log, 'w')
+        self.data_log.write('\t'.join(['PATCH', 'COORDS', 'PATCH_LEVEL', 'PATCH_SIZE']) + '\n')
 
         files = os.listdir(self.root)
         h5s = [x for x in files if '.h5' in x]  # <- whole-slide images
@@ -91,7 +94,9 @@ class BLCA_CL_Dataset(object):
     def __getitem__(self, idx):
         transform = self.data_transformation
         current_patch = self.coords_all[idx]
-        # slide = openslide.OpenSlide(self.root + current_patch[0][:-3] + '.svs')
+        # accumulating data log output text file as we draw patches from coors_all
+        slide_name, coords, lvl, sz = current_patch[0], str(tuple(current_patch[1])), str(current_patch[2]), str(current_patch[3])
+        self.data_log.write('\t'.join([slide_name, coords, lvl, sz]) + '\n')
         # --> getting svs from source directory given as input
         slide = openslide.OpenSlide(self.source_svs_dir + current_patch[0][:-3] + '.svs')
         img = slide.read_region(tuple(current_patch[1]), current_patch[2],
@@ -168,9 +173,9 @@ def construct_hdf5_datasets(input_patches_dir, source_svs_dir, output_prefix, tr
     print(f'construct_hdf5_dataset() called with filter_green={filter_green}')
 
     # generate dataset objects that return numpy array images in the format and size required by PathologyGAN
-    train_dataset = BLCA_CL_Dataset(input_patches_dir, source_svs_dir, train_prop=train_prop,
-                                    mode='Train', return_PIL=True, resize_dim=img_dim, shuffle=shuffle,
-                                    stain_color_map=stain_color_map)
+    train_dataset = BLCA_CL_Dataset(input_patches_dir, source_svs_dir, data_log=output_prefix+'_data_log.txt',
+                                    train_prop=train_prop, mode='Train', return_PIL=True, resize_dim=img_dim,
+                                    shuffle=shuffle, stain_color_map=stain_color_map)
 
     # initialize and populate lists of images
     train_list = []
@@ -200,6 +205,7 @@ def construct_hdf5_datasets(input_patches_dir, source_svs_dir, output_prefix, tr
             else:
                 train_list.append(img)
             i += 1
+    train_dataset.data_log.close()
 
     # save datasets to hdf5
     with h5py.File(output_prefix + '_train.h5', 'w') as f:

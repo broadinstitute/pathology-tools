@@ -12,7 +12,7 @@ import h5py
 def view_patches(h5_file, num_patches, output_dir, shuffle=False):
     dataset = h5py.File(h5_file)
     imgs = dataset['images']
-    inds = np.random.choice(len(imgs['images']), num_patches) if shuffle else range(num_patches)
+    inds = np.random.choice(len(imgs), num_patches) if shuffle else range(num_patches)
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
     for i in inds:

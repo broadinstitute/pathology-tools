@@ -244,5 +244,5 @@ if __name__ == '__main__':
     construct_hdf5_datasets(input_patches_dir=args.input_patches_dir, source_svs_dir=args.source_svs_dir,
                             output_prefix=args.output_prefix,
                             train_prop=args.train_proportion,
-                            img_dim=args.img_dim, max_dataset_size=args.max_dataset_size, shuffle=args.shuffle,
-                            stain_color_map=green_filter_cmap)
+                            img_dim=args.img_dim, max_dataset_size=args.max_dataset_size, shuffle=args.shuffle)
+                            # stain_color_map=green_filter_cmap)

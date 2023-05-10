@@ -221,6 +221,8 @@ class PathologyGAN(GAN):
                 print(f'STARTING EPOCH {epoch}')
                 # saver.save(sess=session, save_path=checkpoints)
                 # # saving per-epoch checkpoints
+                # debug -- checkpoint overwriting
+                print('SAVING CHECKPOINT -- ' + checkpoints[:-4] + '_epoch_%s.ckt' % epoch)
                 saver.save(sess=session, save_path=checkpoints[:-4] + '_epoch_%s.ckt' % epoch)
 
                 # Batch Iteration.

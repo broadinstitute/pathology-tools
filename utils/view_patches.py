@@ -7,9 +7,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 import h5py
+import time
 
+from PIL import Image
 
-def view_patches(h5_file, num_patches, output_dir, shuffle=False):
+def view_patches_matplotlib(h5_file, num_patches, output_dir, shuffle=False):
     dataset = h5py.File(h5_file)
     imgs = dataset['images']
     if num_patches == 'all':
@@ -20,7 +22,22 @@ def view_patches(h5_file, num_patches, output_dir, shuffle=False):
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
     for i in inds:
-        plt.imsave(f'{output_dir}/patch_{i}.png', imgs[i])
+        plt.imsave(f'{output_dir}/MPL_patch_{i}.png', imgs[i])
+
+
+def view_patches_PIL(h5_file, num_patches, output_dir, shuffle=False):
+    dataset = h5py.File(h5_file)
+    imgs = dataset['images']
+    if num_patches == 'all':
+        print(f'Generating images for all {len(imgs)} samples')
+        inds = range(len(imgs))
+    else:
+        inds = np.random.choice(len(imgs), num_patches) if shuffle else range(num_patches)
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+    for i in inds:
+        img = Image.fromarray(imgs[i].astype('uint8'), 'RGB')
+        img.save(f'{output_dir}/PIL_patch_{i}.png', 'PNG')
 
 
 if __name__ == '__main__':
@@ -31,4 +48,12 @@ if __name__ == '__main__':
     parser.add_argument('--output_dir', type=str, help='output image directory')
     parser.add_argument('--shuffle', action='store_true', help='bool flag for drawing random patches from the file')
     args = parser.parse_args()
-    view_patches(args.input_h5, args.num_patches, args.output_dir, shuffle=args.shuffle)
+
+    start_time = time.time()
+    view_patches_matplotlib(args.input_h5, args.num_patches, args.output_dir, shuffle=args.shuffle)
+    mpl_time = time.time()
+    view_patches_PIL(args.input_h5, args.num_patches, args.output_dir, shuffle=args.shuffle)
+    pil_time = time.time()
+    # debug -- time comparison for image conversion
+    print(f'---- Time to generate {args.num_patches} images ----\nmatplotlib: {mpl_time - start_time} seconds'
+          f'\nPIL: {pil_time - mpl_time} seconds')

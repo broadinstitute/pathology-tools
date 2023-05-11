@@ -36,7 +36,7 @@ def view_patches_PIL(h5_file, num_patches, output_dir, shuffle=False):
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
     for i in inds:
-        img = Image.fromarray(imgs[i], 'RGB')
+        img = Image.fromarray(imgs[i])
         img.save(f'{output_dir}/PIL_patch_{i}.png', 'PNG')
 
 

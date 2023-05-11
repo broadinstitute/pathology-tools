@@ -18,7 +18,7 @@ def view_patches_matplotlib(h5_file, num_patches, output_dir, shuffle=False):
         print(f'Generating images for all {len(imgs)} samples')
         inds = range(len(imgs))
     else:
-        inds = np.random.choice(len(imgs), num_patches) if shuffle else range(num_patches)
+        inds = np.random.choice(len(imgs), int(num_patches)) if shuffle else range(int(num_patches))
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
     for i in inds:
@@ -32,7 +32,7 @@ def view_patches_PIL(h5_file, num_patches, output_dir, shuffle=False):
         print(f'Generating images for all {len(imgs)} samples')
         inds = range(len(imgs))
     else:
-        inds = np.random.choice(len(imgs), num_patches) if shuffle else range(num_patches)
+        inds = np.random.choice(len(imgs), int(num_patches)) if shuffle else range(int(num_patches))
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
     for i in inds:

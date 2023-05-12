@@ -38,7 +38,8 @@
 ├── models
 ├── quantify_model_pipeline.py
 ├── real_features.py
-# ---- pretrained CLAM patch_level=0 instance of PathologyGAN -------------
+# ----------------- pretrained CLAM patch_level=0 instance of PathologyGAN ---------------------
+# -- link: https://drive.google.com/file/d/1ziSvMv5baSzKXV7yHUwi66k-Z6G5Ba5u/view?usp=sharing --
 └── pretrained_checkpoint
     ├── PathologyGAN.ckt.data-00000-of-00001
     ├── PathologyGAN.ckt.index

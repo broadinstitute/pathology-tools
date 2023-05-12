@@ -117,3 +117,26 @@ contain a script with docstrings describing intended use). Code adapted from rep
 - https://github.com/tsc2017/Frechet-Inception-Distance
 - https://github.com/tsc2017/Inception-Score
 
+## Auxiliary Software
+### HoVer-Net [GitHub repo](https://github.com/vqdang/hover_net)
+Cell segmentation and classification engine used to generate image annotations from slide/patch images.
+Usage: populate `run_tile.sh` shell script with the run parameters (namely input directory containing patch .jpgs,
+output directory where the label/annotation files will be stored, and model checkpoint to use)
+Example `run_tile.sh`:
+```
+python {path_to}/hover_net/run_infer.py \
+--gpu='1' \
+--nr_types=6 \
+--type_info_path=type_info.json \
+--batch_size=64 \
+--model_mode=fast \
+--model_path=hover-net-pytorch-weights/hovernet_fast_pannuke_type_tf2pytorch.tar \
+--nr_inference_workers=8 \
+--nr_post_proc_workers=16 \
+tile \
+--input_dir={path_to}/hover_net/experiment_directory/patches/ \
+--output_dir={path_to}/hover_net/experiment_directory/output/ \
+--mem_usage=0.1 \
+--draw_dot \
+--save_qupath
+```

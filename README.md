@@ -1,5 +1,27 @@
-# PurityGAN
-Experiments for different GAN problems related to histopathology image analysis
+# HistEval
+***Pipeline for histology model evaluation and data augmentation under varying data distribution***
+
+                            +-------------------+           +-----------------------+          +-----------------------------+
+ +---------------+          |  Image Annotation |           | Dataset Constructor   |          | Model Exec                  |
+ | Image Dataset +--------->+                   +---------->+                       +--------->+                             |
+ +---------------+          |  - HoverNet       |           | - Output diagnostic   |          | - Input model and datasets  |
+         ^                  |  - ...            |           |   datasets of varying |          | - Output performance        |
+         |                  |                   |           |   distribution using  |          |   breakdown in terms of     |
+         |                  +-------------------+           |   annotation          |          |   input dataset composition |
+         |                                                  +-----------------------+          +-----------------------------+
+         |                                                                                                    |
+         |                                                                                                    |
+         |                                                                                                    |
+         |                                                                                                    |
+         |                                                                                                    |
+         |                                         +-----------------------+                                  |
+         |                                         | Data Augmentation     |                                  |
+         +-----------------------------------------+                       +<---------------------------------+
+                                                   | - Design augmented    |
+                                                   |   dataset reflecting  |
+                                                   |   points of weakness  |
+                                                   |   for the model       |
+                                                   +-----------------------+
 
 ## Pathology-GAN
 ```
@@ -16,7 +38,7 @@ Experiments for different GAN problems related to histopathology image analysis
 ├── models
 ├── quantify_model_pipeline.py
 ├── real_features.py
-# ---- pretrained CLAM patch_level=1 instance of PathologyGAN -------------
+# ---- pretrained CLAM patch_level=0 instance of PathologyGAN -------------
 └── pretrained_checkpoint
     ├── PathologyGAN.ckt.data-00000-of-00001
     ├── PathologyGAN.ckt.index
@@ -77,28 +99,20 @@ interpolation example. A call to the script under this mode can be made using th
 python ./generate_image_interpolation.py --num_samples 100 --z_dim 200 --checkpoint data_model_output/PathologyGAN/h224_w224_n3_zdim_200/checkpoints/PathologyGAN.ckt --exemplar1 low_d_cluster.pkl --exemplar2 high_d_cluster.pkl
 ```
 
+## Utils
+`utils/` directory contains utility scripts for generating and viewing patch datasets.
+- `patch_dataset.py`: Generates .h5 patch image dataset files (in a format that can be given to PathologGAN for training) from CLAM output (.svs and .h5 files containing source slides and patch information respectively). Example call:
+```
+python utils/patch_dataset.py --input_patches {path/to/CLAM/patches} --source_svs_dir {path/to/svs/directory} --output_prefix {path/to/output/directory} --max_dataset_size {num_patches} --shuffle
+```
+- `view_patches.py`: Generates .png patch images from .h5 dataset file. Example call:
+```
+python utils/view_patches.py --input_h5 {path/to/patches.h5} --num_patches {int in range (0, dataset_size], or 'all'} --output_dir {path/to/output/directory} 
+```
+
 ## Evaluation Tools
 Scripts for calulating FID and Inception Score provided in `/evaluation_tools/{FID, IS}` respectively (both directories
 contain a script with docstrings describing intended use). Code adapted from repos:
 - https://github.com/tsc2017/Frechet-Inception-Distance
 - https://github.com/tsc2017/Inception-Score
 
-## Wasserstein_BiGAN
-```
-├── main.py
-├── models.py
-├── patch_dataset.py
-├── preprocess.py
-├── train.py
-└── util.py
-```
-### Conda environment
-`environment.yml` can be used to create a conda virtual environment with the necessary packages with `conda env create --file environment.yml`
-### virtualenv
-`requirements.txt` can be used, and OpenSlide needs to be installed separately and can be done so with the conda command `conda install -c conda-forge openslide`.
-
-Code for (Wasserstein-)BiGAN image compression system to be trained on slide patch images, and ultimately used to create a three-dimensional compression of whole-slide images. `main.py` provides all available user-specified experimental settings (as well as default values for the CLI arguments), and an example call that will instantiate and train a BiGAN on the SVHN dataset is
-```
-python main.py --dataset svhn --image_size 32 --epochs 200
-```
-*NB: you'll need to create results directories before executing training*

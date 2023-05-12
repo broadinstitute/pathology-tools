@@ -1,27 +1,27 @@
 # HistEval
 ***Pipeline for histology model evaluation and data augmentation under varying data distribution***
 ```
-                            +-------------------+           +-----------------------+          +-----------------------------+
- +---------------+          |  Image Annotation |           | Dataset Constructor   |          | Model Exec                  |
- | Image Dataset +--------->+                   +---------->+                       +--------->+                             |
- +---------------+          |  - HoverNet       |           | - Output diagnostic   |          | - Input model and datasets  |
-         ^                  |  - ...            |           |   datasets of varying |          | - Output performance        |
-         |                  |                   |           |   distribution using  |          |   breakdown in terms of     |
-         |                  +-------------------+           |   annotation          |          |   input dataset composition |
-         |                                                  +-----------------------+          +-----------------------------+
-         |                                                                                                    |
-         |                                                                                                    |
-         |                                                                                                    |
-         |                                                                                                    |
-         |                                                                                                    |
-         |                                         +-----------------------+                                  |
-         |                                         | Data Augmentation     |                                  |
-         +-----------------------------------------+                       +<---------------------------------+
-                                                   | - Design augmented    |
-                                                   |   dataset reflecting  |
-                                                   |   points of weakness  |
-                                                   |   for the model       |
-                                                   +-----------------------+
+                      +-------------------+    +-----------------------+    +-----------------------------+
+ +---------------+    |  Image Annotation |    | Dataset Constructor   |    | Model Exec                  |
+ | Image Dataset +--->+                   +--->+                       +--->+                             |
+ +---------------+    |  - HoverNet       |    | - Output diagnostic   |    | - Input model and datasets  |
+         ^            |  - ...            |    |   datasets of varying |    | - Output performance        |
+         |            |                   |    |   distribution using  |    |   breakdown in terms of     |
+         |            +-------------------+    |   annotation          |    |   input dataset composition |
+         |                                     +-----------------------+    +-----------------------------+
+         |                                                                                 |
+         |                                                                                 |
+         |                                                                                 |
+         |                                                                                 |
+         |                                                                                 |
+         |                         +-----------------------+                               |
+         |                         | Data Augmentation     |                               |
+         +-------------------------+                       +<------------------------------+
+                                   | - Design augmented    |
+                                   |   dataset reflecting  |
+                                   |   points of weakness  |
+                                   |   for the model       |
+                                   +-----------------------+
 ```
 ## Pathology-GAN
 ```

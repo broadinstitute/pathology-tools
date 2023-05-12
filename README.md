@@ -1,6 +1,6 @@
 # HistEval
 ***Pipeline for histology model evaluation and data augmentation under varying data distribution***
-
+```
                             +-------------------+           +-----------------------+          +-----------------------------+
  +---------------+          |  Image Annotation |           | Dataset Constructor   |          | Model Exec                  |
  | Image Dataset +--------->+                   +---------->+                       +--------->+                             |
@@ -22,7 +22,7 @@
                                                    |   points of weakness  |
                                                    |   for the model       |
                                                    +-----------------------+
-
+```
 ## Pathology-GAN
 ```
 ├── CRImage

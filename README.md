@@ -1,4 +1,7 @@
-# HistEval
+# *pathology-tools*
+Toolkit containing several utility scripts with wrappers to generate, label, and evaluate real and synthetic H&E breast cancer slide patches.
+
+
 ***Pipeline for histology model evaluation and data augmentation under varying data distribution***
 ```
                       +-------------------+    +-----------------------+    +-----------------------------+
@@ -117,7 +120,17 @@ contain a script with docstrings describing intended use). Code adapted from rep
 - https://github.com/tsc2017/Frechet-Inception-Distance
 - https://github.com/tsc2017/Inception-Score
 
-## Auxiliary Software
+## Slide-processing and Cell Segmentation Software
+### CLAM [GitHub repo](https://github.com/mahmoodlab/CLAM/)
+CLAM is a tool for the processing and analysis of .svs slides, and below we include an example command that can be run to have CLAM
+process a set of input .svs slide files and generate the coordinates for a desired number of patches (extracted in accordance with
+various parameters available to the function):
+```
+python {path}/{to}/{CLAM}/create_patches_fp.py --source /local/storage/TCGA_data/test_tcga_brca --save_dir {output directory} --patch_size {desired size}--step_size {desired size} --seg --patch --stitch [--patch_level: {desired magnification level; default=0}]
+```
+Installation instructions for CLAM are available [here](https://github.com/mahmoodlab/CLAM/blob/master/docs/INSTALLATION.md).
+
+
 ### HoVer-Net [GitHub repo](https://github.com/vqdang/hover_net)
 Cell segmentation and classification engine used to generate image annotations from slide/patch images.
 Usage: populate `run_tile.sh` shell script with the run parameters (namely input directory containing patch .jpgs,

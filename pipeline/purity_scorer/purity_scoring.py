@@ -17,15 +17,15 @@ def extract_purity(mat_dirs, output_path):
     for mat_file in tqdm(mat_files):
         seg = sio.loadmat(mat_file)
         unique, counts = np.unique(seg['inst_type'], return_counts=True)
-        # dict keyed on hovernet labels - 0: cc, 1: imm, 2: con, 3: nec, 4: ep
+        # dict keyed on hovernet labels - 1: cc, 2: imm, 3: con, 4: nec, 5: ep
         counts_dict = {}
-        for cell_type in range(5):
+        for cell_type in range(1, 6):
             idx = np.argwhere(unique == cell_type)
             counts_dict[cell_type] = counts[idx[0, 0]] if idx.shape[0] == idx.shape[1] == 1 else 0
         pur = round(counts_dict[1] / seg['inst_type'].shape[0], 4) if seg['inst_type'].shape[0] > 0 else 0
         cancer_purity.append(pd.DataFrame(np.asarray([mat_file[:-4]+'.png',
-                                                      counts_dict[0], pur, counts_dict[1], counts_dict[2],
-                                                      counts_dict[3], counts_dict[4]], dtype=object).reshape((1, -1))))
+                                                      counts_dict[1], pur, counts_dict[2], counts_dict[3],
+                                                      counts_dict[4], counts_dict[5]], dtype=object).reshape((1, -1))))
     cp_df = pd.concat(cancer_purity)
     cp_df.to_csv(output_path)
 
